@@ -1,0 +1,52 @@
+{% extends 'aluguel/base.html' %}
+{% load static %} {% block content %}
+    <link rel="stylesheet" href="{% static 'css/menu.css' %}">
+
+    <div class="text-center mb-5">
+        <h1 class="display-4">Painel de Controle</h1>
+        <p class="lead text-muted">Selecione uma das opções abaixo para começar.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+            <a href="#" class="menu-card">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-people-fill"></i>
+                        <h5 class="card-title">Gestão de Usuários</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+        
+            <a href="{% url 'aluguel:usuario_crud' %}" class="menu-card">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-people-fill"></i>
+                        <h5 class="card-title">Gestão de Usuários</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="#" class="menu-card"> <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-arrow-left-right"></i>
+                        <h5 class="card-title">Gestão de Empréstimos</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <a href="#" class="menu-card"> <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-file-earmark-bar-graph"></i>
+                        <h5 class="card-title">Gerar Relatórios</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+{% endblock %}

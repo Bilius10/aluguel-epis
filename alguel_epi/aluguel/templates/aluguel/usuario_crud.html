@@ -1,0 +1,63 @@
+{% extends 'aluguel/base.html' %}
+{% load static %} 
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/crud.css' %}">
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Gestão de Usuários</h1>
+        <a href="{% url 'menu_principal' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left-circle"></i> Voltar ao Menu
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-7">
+            <h2>Usuários Cadastrados</h2>
+            <ul class="list-group" id="user-list">
+                {% for usuario in usuarios %}
+                <li class="list-group-item d-flex justify-content-between align-items-center" id="user-{{ usuario.id }}">
+                    <span>
+                        <strong>{{ usuario.nome_completo }}</strong> (Matrícula: {{ usuario.matricula }})
+                    </span>
+                    <div>
+                        <button class="btn btn-sm btn-warning btn-edit" data-id="{{ usuario.id }}">
+                            <i class="bi bi-pencil-fill"></i> Editar
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-delete" data-id="{{ usuario.id }}">
+                            <i class="bi bi-trash-fill"></i>
+                        </button>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-header">
+                    <h2 id="form-title">Cadastrar Novo Usuário</h2>
+                </div>
+                <div class="card-body">
+                    <form id="user-form" data-create-url="{% url 'aluguel:usuario_crud' %}">
+                        {% csrf_token %}
+                        <input type="hidden" id="user-id">
+                        
+                        {{ form.as_p }}
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" id="btn-cancel" style="display: none;">Cancelar</button>
+                            <button type="submit" class="btn btn-primary" id="btn-submit">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/crud.js' %}"></script>
+
+{% endblock %}
