@@ -40,34 +40,23 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
         source venv/bin/activate
         ```
 
-3.  **Instale as dependências:**
-    Crie um arquivo `requirements.txt` com as dependências do projeto. Ele deve conter no mínimo:
-    ```
-    Django>=5.0
-    psycopg[binary]
-    ```
-    Em seguida, instale-as com o comando:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4.  **Configure o Banco de Dados:**
+3.  **Configure o Banco de Dados:**
     No arquivo `settings.py`, localize a seção `DATABASES` e insira as credenciais do seu banco de dados PostgreSQL.
 
-5.  **Aplique as migrações:**
+4.  **Aplique as migrações:**
     Este comando irá criar todas as tabelas no banco de dados com base nos modelos definidos.
     ```bash
     python manage.py migrate
     ```
 
-6.  **Crie um superusuário:**
+5.  **Crie um superusuário:**
     Você precisará de um usuário administrador para acessar o painel de admin do Django.
     ```bash
     python manage.py createsuperuser
     ```
     Siga as instruções para criar seu login e senha.
 
-7.  **Inicie o servidor de desenvolvimento:**
+6.  **Inicie o servidor de desenvolvimento:**
     ```bash
     python manage.py runserver
     ```
