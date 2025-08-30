@@ -10,29 +10,6 @@
 * [cite_start]João Vitor da Rosa de Oliveira [cite: 1]
 * [cite_start]Lissandro Dauer [cite: 2]
 
-## ✨ Funcionalidades Principais
-
-O sistema conta com os seguintes módulos:
-
-* [cite_start]**RF01 - Gerenciamento de Pessoas:** Permite o cadastro centralizado de administradores, técnicos e colaboradores, diferenciando seus papéis e permissões no sistema[cite: 15, 16].
-* [cite_start]**RF02 - Cadastro de EPIs:** Permite o cadastro completo dos equipamentos, incluindo nome, número do Certificado de Aprovação (CA), data de validade e quantidade em estoque[cite: 17].
-* [cite_start]**RF03 - Registro de Empréstimo:** Um técnico pode registrar a retirada de EPIs para um colaborador, com o sistema abatendo a quantidade do estoque automaticamente[cite: 18].
-* [cite_start]**RF04 - Registro de Devolução:** Permite registrar a devolução de um EPI, atualizando o status do empréstimo e retornando o item ao estoque[cite: 19].
-* [cite_start]**RF05 - Geração de Relatórios:** O sistema é capaz de gerar relatórios essenciais, como EPIs pendentes, histórico por colaborador e inventário de estoque[cite: 20].
-
-## 🛠️ Tecnologias Utilizadas
-
-* [cite_start]**Backend:** Python 3.12+ [cite: 10]
-* [cite_start]**Framework:** Django 5.1+ [cite: 10]
-* **Banco de Dados:** PostgreSQL
-* **Frontend:** HTML, CSS, JavaScript (com Bootstrap 5)
-
-## 🗄️ Modelo do Banco de Dados
-
-A estrutura do banco de dados foi modelada para suportar as funcionalidades principais do sistema, consistindo em três entidades principais: `Usuarios`, `EPI` e `Emprestimos`.
-
-![Diagrama do Banco de Dados](image_62a18c.png)
-
 ## 🚀 Como Executar o Projeto
 
 Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento localmente.
