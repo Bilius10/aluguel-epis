@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Pega a URL de criação do atributo data-* do formulário
     const createUrl = form.dataset.createUrl;
 
+    // Função para redefinir o formulário
     function resetForm() {
         form.reset();
         userIdInput.value = '';
@@ -17,6 +18,25 @@ document.addEventListener('DOMContentLoaded', function() {
         btnSubmit.textContent = 'Salvar';
         btnCancel.style.display = 'none';
     }
+
+    // Evento para o botão "Cancelar"
+    btnCancel.addEventListener('click', () => {
+        resetForm();
+    });
+
+    // Evento para o botão "Editar"
+    document.querySelectorAll('.btn-edit').forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+            const userId = event.target.dataset.id;
+            const userName = event.target.closest('li').querySelector('strong').textContent;
+
+            // Preencher o formulário com os dados do usuário
+            userIdInput.value = userId;
+            formTitle.textContent = `Editar Usuário: ${userName}`;
+            btnSubmit.textContent = 'Atualizar';
+            btnCancel.style.display = 'inline-block';
+        });
+    });
 
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
