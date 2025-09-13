@@ -2,15 +2,17 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views import View
-from .models import Usuarios
-from .forms import UsuarioForm
+from .models import Usuarios, EPI, Emprestimos
+from .forms import UsuarioForm, EPIForm, EmprestimoForm
 from django.views.generic import TemplateView 
-from .models import Usuarios
-from .forms import UsuarioForm
 from django.contrib.auth.hashers import make_password
 
+
+class ProfileView(TemplateView):
+    template_name = "aluguel/profile.html"
+
 class MenuView(TemplateView):
-    template_name = "aluguel/menu.html"
+    template_name = "aluguel/base.html"
 
 class UsuarioCRUDView(View):
     def get(self, request):
@@ -38,7 +40,6 @@ class UsuarioCRUDView(View):
             })
         return JsonResponse({'success': False, 'errors': form.errors})
 
-# 2. VIEW PARA BUSCAR DADOS DE UM USUÁRIO (PARA EDIÇÃO)
 def get_usuario_data(request, pk):
     usuario = get_object_or_404(Usuarios, pk=pk)
     data = {
@@ -53,7 +54,6 @@ def get_usuario_data(request, pk):
     }
     return JsonResponse(data)
 
-# 3. VIEW PARA ATUALIZAR UM USUÁRIO
 def update_usuario(request, pk):
     if request.method == 'POST':
         usuario_instance = get_object_or_404(Usuarios, pk=pk)
@@ -79,12 +79,170 @@ def update_usuario(request, pk):
         return JsonResponse({'success': False, 'errors': form.errors})
     return JsonResponse({'success': False, 'error': 'Método inválido'}, status=405)
 
-
-
 # 4. VIEW PARA DELETAR UM USUÁRIO
 def delete_usuario(request, pk):
     if request.method == 'DELETE':
         usuario = get_object_or_404(Usuarios, pk=pk)
         usuario.delete()
         return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Método inválido'}, status=405)
+
+
+class EPICRUDView(View):
+
+    def get(self, request):
+
+        epis = EPI.objects.all().order_by('nome_equipamento')
+        form = EPIForm()
+        return render(request, 'aluguel/epi_crud.html', {'epis': epis, 'form': form})
+
+    def post(self, request):
+
+        form = EPIForm(request.POST)
+        if form.is_valid():
+            epi = form.save()
+
+            epi_data = {
+                'id': epi.id,
+                'nome_equipamento': epi.nome_equipamento,
+                'ca_numero': epi.ca_numero,
+                'data_validade_ca': epi.data_validade_ca.strftime('%Y-%m-%d') if epi.data_validade_ca else None,
+                'quantidade_disponivel': epi.quantidade_disponivel,
+                'quantidade_total': epi.quantidade_total
+            }
+            return JsonResponse({'success': True, 'epi': epi_data})
+
+        return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+
+def get_epi_data(request, pk):
+    epi = get_object_or_404(EPI, pk=pk)
+    data = {
+        'id': epi.id,
+        'nome_equipamento': epi.nome_equipamento,
+        'ca_numero': epi.ca_numero,
+        'data_validade_ca': epi.data_validade_ca.strftime('%Y-%m-%d') if epi.data_validade_ca else None,
+        'quantidade_total': epi.quantidade_total,
+        'quantidade_disponivel': epi.quantidade_disponivel,
+    }
+    return JsonResponse(data)
+
+
+def update_epi(request, pk):
+    if request.method == 'POST':
+        epi_instance = get_object_or_404(EPI, pk=pk)
+        data = json.loads(request.body)
+        form = EPIForm(data, instance=epi_instance)
+        if form.is_valid():
+            epi = form.save()
+            epi_data = {
+                'id': epi.id,
+                'nome_equipamento': epi.nome_equipamento,
+                'ca_numero': epi.ca_numero,
+                'data_validade_ca': epi.data_validade_ca.strftime('%Y-%m-%d') if epi.data_validade_ca else None,
+                'quantidade_disponivel': epi.quantidade_disponivel,
+                'quantidade_total': epi.quantidade_total
+            }
+            return JsonResponse({'success': True, 'epi': epi_data})
+        return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+    return JsonResponse({'success': False, 'error': 'Método inválido'}, status=405)
+
+
+def delete_epi(request, pk):
+    if request.method == 'DELETE':
+        epi = get_object_or_404(EPI, pk=pk)
+        epi.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Método inválido'}, status=405)
+
+class EmprestimoCRUDView(View):
+
+    def get(self, request):
+
+        emprestimos = Emprestimos.objects.select_related('epi', 'colaborador', 'tecnico').all().order_by('-data_retirada')
+        form = EmprestimoForm()
+        return render(request, 'aluguel/emprestimo_crud.html', {'emprestimos': emprestimos, 'form': form})
+
+    def post(self, request):
+
+        form = EmprestimoForm(request.POST)
+        if form.is_valid():
+            try:
+
+                with transaction.atomic():
+
+                    epi_selecionado = form.cleaned_data['epi']
+                    
+                    if epi_selecionado.quantidade_disponivel <= 0:
+                        return JsonResponse({'success': False, 'errors': {'epi': ['Este EPI não está mais disponível em estoque.']}}, status=400)
+
+                    # Salva o empréstimo
+                    emprestimo = form.save()
+
+                    epi_selecionado.quantidade_disponivel = F('quantidade_disponivel') - 1
+                    epi_selecionado.save()
+
+                emprestimo_data = {
+                    'id': emprestimo.id,
+                    'colaborador_nome': emprestimo.colaborador.nome_completo,
+                    'epi_nome': emprestimo.epi.nome_equipamento,
+                    'data_retirada': emprestimo.data_retirada.strftime('%d/%m/%Y %H:%M'),
+                    'status': emprestimo.get_status_display(),
+                }
+                return JsonResponse({'success': True, 'emprestimo': emprestimo_data})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': f'Erro interno do servidor: {str(e)}'}, status=500)
+                
+        return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+def get_emprestimo_data(request, pk):
+
+    emprestimo = get_object_or_404(Emprestimos, pk=pk)
+    data = {
+        'epi': emprestimo.epi.id,
+        'colaborador': emprestimo.colaborador.id,
+        'tecnico': emprestimo.tecnico.id,
+        'observacao': emprestimo.observacao,
+    }
+    return JsonResponse(data)
+
+def update_emprestimo(request, pk):
+
+    if request.method == 'POST':
+        emprestimo_instance = get_object_or_404(Emprestimos, pk=pk)
+        data = json.loads(request.body)
+        form = EmprestimoForm(data, instance=emprestimo_instance)
+        
+        if form.is_valid():
+            emprestimo = form.save()
+            emprestimo_data = {
+                'id': emprestimo.id,
+                'colaborador_nome': emprestimo.colaborador.nome_completo,
+                'epi_nome': emprestimo.epi.nome_equipamento,
+                'data_retirada': emprestimo.data_retirada.strftime('%d/%m/%Y %H:%M'),
+                'status': emprestimo.get_status_display(),
+            }
+            return JsonResponse({'success': True, 'emprestimo': emprestimo_data})
+            
+        return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+    return JsonResponse({'success': False, 'error': 'Método inválido'}, status=405)
+
+
+def delete_emprestimo(request, pk):
+    """ Deleta um empréstimo e devolve o item ao estoque. """
+    if request.method == 'DELETE':
+        try:
+            with transaction.atomic():
+                emprestimo = get_object_or_404(Emprestimos, pk=pk)
+                epi_a_devolver = emprestimo.epi
+
+                emprestimo.delete()
+
+                epi_a_devolver.quantidade_disponivel = F('quantidade_disponivel') + 1
+                epi_a_devolver.save()
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': f'Erro interno do servidor: {str(e)}'}, status=500)
+
     return JsonResponse({'success': False, 'error': 'Método inválido'}, status=405)

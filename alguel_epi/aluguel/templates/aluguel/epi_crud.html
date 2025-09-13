@@ -1,22 +1,21 @@
 {% extends 'aluguel/base.html' %}
 {% load static %}
 
-{% block title %}Cadastro de Colaborador{% endblock %}
+{% block title %}Cadastro de Equipamentos (EPIs){% endblock %}
 
 {% block head_extra %}
-    <link rel="stylesheet" href="{% static 'css/usuario_crud.css' %}">
+    <link rel="stylesheet" href="{% static 'css/epi_crud.css' %}">
 {% endblock %}
 
-{% block page_title %}Cadastro de Colaborador{% endblock %}
-
+{% block page_title %}Cadastro de Equipamentos (EPIs){% endblock %}
 
 {% block content %}
 <div class="content-area">
     <div class="toolbar">
-        <button id="add-user-btn" class="btn btn-primary">Adicionar Novo</button>
+        <button id="add-epi-btn" class="btn btn-primary">Adicionar Novo EPI</button>
         <div class="search-container">
             <i class="bi bi-search"></i>
-            <input type="text" id="search-input" placeholder="Pesquisar por nome ou matrícula...">
+            <input type="text" id="search-input" placeholder="Pesquisar por nome ou CA...">
         </div>
     </div>
 
@@ -24,16 +23,20 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Nome Completo</th>
-                    <th>Matrícula</th>
+                    <th>Nome do Equipamento</th>
+                    <th>Número do CA</th>
+                    <th>Validade do CA</th>
+                    <th>Disponível / Total</th>
                     <th>Ações</th>
                 </tr>
             </thead>
-            <tbody id="user-table-body">
-                {% for usuario in usuarios %}
-                <tr data-id="{{ usuario.id }}">
-                    <td>{{ usuario.nome_completo }}</td>
-                    <td>{{ usuario.matricula }}</td>
+            <tbody id="epi-table-body">
+                {% for epi in epis %}
+                <tr data-id="{{ epi.id }}">
+                    <td>{{ epi.nome_equipamento }}</td>
+                    <td>{{ epi.ca_numero }}</td>
+                    <td>{{ epi.data_validade_ca|date:"d/m/Y" }}</td>
+                    <td>{{ epi.quantidade_disponivel }} / {{ epi.quantidade_total }}</td>
                     <td class="action-buttons">
                         <button class="btn-icon btn-edit" title="Editar">
                             <i class="bi bi-pencil-fill"></i>
@@ -49,49 +52,43 @@
     </div>
 </div>
 
-<div id="user-modal" class="modal">
+<div id="epi-modal" class="modal">
     <div class="modal-content">
         <header class="modal-header">
-            <h2 id="modal-title">Adicionar Novo Colaborador</h2>
+            <h2 id="modal-title">Adicionar Novo EPI</h2>
             <button class="close-btn">&times;</button>
         </header>
         <div class="modal-body">
-            <form id="user-form" novalidate>
+            <form id="epi-form" novalidate>
                 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="id_nome_equipamento">Nome do Equipamento</label>
+                    {{ form.nome_equipamento }}
+                </div>
+                
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="id_nome_completo">Nome Completo</label>
-                        {{ form.nome_completo }}
+                        <label for="id_ca_numero">Número do CA</label>
+                        {{ form.ca_numero }}
                     </div>
                     <div class="form-group">
-                        <label for="id_matricula">Matrícula</label>
-                        {{ form.matricula }}
+                        <label for="id_data_validade_ca">Data de Validade do CA</label>
+                        {{ form.data_validade_ca }}
                     </div>
                 </div>
+
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="id_cpf">CPF</label>
-                        {{ form.cpf }}
+                        <label for="id_quantidade_total">Quantidade Total</label>
+                        {{ form.quantidade_total }}
                     </div>
                     <div class="form-group">
-                        <label for="id_cargo">Cargo</label>
-                        {{ form.cargo }}
+                        <label for="id_quantidade_disponivel">Quantidade Disponível</label>
+                        {{ form.quantidade_disponivel }}
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="id_tipo_usuario">Tipo de Usuário</label>
-                        {{ form.tipo_usuario }}
-                    </div>
-                    <div class="form-group">
-                        <label for="id_login">Login</label>
-                        {{ form.login }}
-                    </div>
-                </div>
-                <div class="form-group-checkbox">
-                    {{ form.ativo }}
-                    <label for="id_ativo">Usuário Ativo</label>
-                </div>
+
                 <footer class="modal-footer">
                     <button type="button" id="cancel-btn" class="btn btn-secondary">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Salvar</button>
@@ -102,7 +99,6 @@
 </div>
 {% endblock %}
 
-
 {% block scripts %}
-    <script src="{% static 'js/usuario_crud.js' %}"></script>
+    <script src="{% static 'js/epi_crud.js' %}"></script>
 {% endblock %}

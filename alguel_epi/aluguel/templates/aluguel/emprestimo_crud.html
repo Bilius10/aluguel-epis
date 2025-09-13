@@ -1,0 +1,109 @@
+{% extends 'aluguel/base.html' %}
+{% load static %}
+
+{% block title %}Controle de Empréstimos{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{% static 'css/usuario_crud.css' %}"> {# Reutilizamos muitos estilos #}
+    <link rel="stylesheet" href="{% static 'css/emprestimo_crud.css' %}"> {# Para estilos específicos #}
+{% endblock %}
+
+{% block page_title %}Controle de Empréstimos{% endblock %}
+
+{% block content %}
+<div class="content-area">
+    <div class="toolbar">
+        <button id="add-emprestimo-btn" class="btn btn-primary">Registrar Novo Empréstimo</button>
+        <div class="search-container">
+            <i class="bi bi-search"></i>
+            <input type="text" id="search-input" placeholder="Pesquisar por colaborador ou EPI...">
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Colaborador</th>
+                    <th>EPI</th>
+                    <th>Data de Retirada</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="emprestimo-table-body">
+                {% for emprestimo in emprestimos %}
+                <tr data-id="{{ emprestimo.id }}">
+                    <td>{{ emprestimo.colaborador.nome_completo }}</td>
+                    <td>{{ emprestimo.epi.nome_equipamento }}</td>
+                    <td>{{ emprestimo.data_retirada|date:"d/m/Y H:i" }}</td> {# Formato mais amigável #}
+                    <td>{{ emprestimo.get_status_display }}</td> {# Para exibir o texto do status #}
+                    <td class="action-buttons">
+                        <button class="btn-icon btn-edit" title="Editar">
+                            <i class="bi bi-pencil-fill"></i>
+                        </button>
+                        <button class="btn-icon btn-delete" title="Registrar Devolução / Excluir">
+                            <i class="bi bi-check-circle-fill text-success"></i> {# Ícone diferente para indicar devolução #}
+                            {# <i class="bi bi-trash-fill"></i> Poderia ser o de lixeira para exclusão total #}
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">Nenhum empréstimo registrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{# Modal para Adicionar/Editar Empréstimo #}
+<div id="emprestimo-modal" class="modal">
+    <div class="modal-content">
+        <header class="modal-header">
+            <h2 id="modal-title">Registrar Novo Empréstimo</h2>
+            <button class="close-btn">&times;</button>
+        </header>
+        <div class="modal-body">
+            <form id="emprestimo-form" novalidate>
+                {% csrf_token %} {# Inclui o token CSRF #}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.epi.id_for_label }}">EPI</label>
+                        {{ form.epi }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.colaborador.id_for_label }}">Colaborador</label>
+                        {{ form.colaborador }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.tecnico.id_for_label }}">Técnico Responsável</label>
+                        {{ form.tecnico }}
+                    </div>
+                    {# O campo 'status' será atualizado via JavaScript ou lógica do backend na devolução #}
+                    {# <div class="form-group">
+                        <label for="{{ form.status.id_for_label }}">Status</label>
+                        {{ form.status }}
+                    </div> #}
+                </div>
+                <div class="form-group"> {# Observação em linha completa #}
+                    <label for="{{ form.observacao.id_for_label }}">Observações</label>
+                    {{ form.observacao }}
+                </div>
+                
+                <footer class="modal-footer">
+                    <button type="button" id="cancel-btn" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Empréstimo</button>
+                </footer>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'js/emprestimo_crud.js' %}"></script>
+{% endblock %}

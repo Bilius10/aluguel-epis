@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config      # <-- ADICIONE ESTA LINHA
+import dj_database_url    
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -76,12 +78,8 @@ WSGI_APPLICATION = 'alguel_epi.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # Tipo do banco
-        'NAME': 'epi',                              # Nome do banco
-        'USER': 'postgres',                         # Usuário do PostgreSQL
-        'PASSWORD': 'Jv35521423',                   # Senha do usuário
-        'HOST': 'localhost',                        # Onde está rodando (ou IP do servidor)
-        'PORT': '5432',                             # Porta padrão do PostgreSQL
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 

@@ -1,0 +1,81 @@
+/* Estilos para o editor de perfil */
+#profile-editor-content {
+    display: none; /* Escondido por padrão */
+    max-width: 500px;
+}
+
+.profile-pic-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin-bottom: 2rem;
+    cursor: pointer;
+}
+
+#profile-preview {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #eee;
+    background-color: #f8f9fa;
+}
+
+#profile-upload {
+    display: none;
+}
+
+.profile-pic-container label {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: #007bff;
+    color: white;
+    padding: 6px;
+    border-radius: 50%;
+    line-height: 1;
+    cursor: pointer;
+    border: 2px solid white;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+#save-profile-btn {
+    padding: 0.75rem 1.5rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+}
+#save-profile-btn:hover {
+    background-color: #218838;
+}
+
+/* Estilo para a imagem de perfil no header */
+.user-info .header-profile-pic {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-left: 8px;
+}

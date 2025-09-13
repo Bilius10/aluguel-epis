@@ -21,5 +21,5 @@ from aluguel.views import MenuView
 urlpatterns = [
     path('', MenuView.as_view(), name='menu_principal'),
     path('admin/', admin.site.urls),
-    path('usuarios/', include(('aluguel.urls', 'aluguel'))),
+    path('menu/', include(('aluguel.urls', 'aluguel'))),
 ]
