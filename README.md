@@ -40,19 +40,16 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
         source venv/bin/activate
         ```
 
-3.  **Configure o Banco de Dados:**
-    No arquivo `settings.py`, localize a seção `DATABASES` e insira as credenciais do seu banco de dados PostgreSQL.
-
-4.  **Aplique as migrações:**
+3.  **Aplique as migrações:**
     Este comando irá criar todas as tabelas no banco de dados com base nos modelos definidos.
     ```bash
     python manage.py migrate
     ```
 
-5.  **Inicie o servidor de desenvolvimento:**
+4.  **Inicie o servidor de desenvolvimento:**
     ```bash
     python manage.py runserver
     ```
 
-8.  **Acesse a aplicação:**
+5.  **Acesse a aplicação:**
     Abra seu navegador e acesse [http://127.0.0.1:8000/](http://127.0.0.1:8000/). Você deverá ver a página de menu inicial do projeto.
