@@ -28,7 +28,7 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
     cd nome-da-pasta-do-projeto
     ```
 
-2.  **Crie e ative um ambiente virtual:**
+2.  **Crie e ative um ambiente virtual: (Não é obrigatorio)**
     * No Windows:
         ```bash
         python -m venv venv
