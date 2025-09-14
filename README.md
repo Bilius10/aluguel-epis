@@ -49,14 +49,7 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
     python manage.py migrate
     ```
 
-5.  **Crie um superusuário:**
-    Você precisará de um usuário administrador para acessar o painel de admin do Django.
-    ```bash
-    python manage.py createsuperuser
-    ```
-    Siga as instruções para criar seu login e senha.
-
-6.  **Inicie o servidor de desenvolvimento:**
+5.  **Inicie o servidor de desenvolvimento:**
     ```bash
     python manage.py runserver
     ```
