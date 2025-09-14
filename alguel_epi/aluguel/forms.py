@@ -68,38 +68,28 @@ class EPIForm(forms.ModelForm):
         }
 
 class EmprestimoForm(forms.ModelForm):
-
     class Meta:
         model = Emprestimos
-        
         fields = [
             'epi', 
             'colaborador', 
             'tecnico', 
             'observacao'
         ]
-
         labels = {
             'epi': 'Equipamento (EPI)',
             'colaborador': 'Colaborador (Quem retira)',
             'tecnico': 'Técnico Responsável',
             'observacao': 'Observações (Opcional)',
         }
-
         widgets = {
-            'epi': forms.Select(
-                attrs={'class': 'form-select'}
-            ),
-            'colaborador': forms.Select(
-                attrs={'class': 'form-select'}
-            ),
-            'tecnico': forms.Select(
-                attrs={'class': 'form-select'}
-            ),
+            'epi': forms.Select(attrs={'class': 'form-select'}),
+            'colaborador': forms.Select(attrs={'class': 'form-select'}),
+            'tecnico': forms.Select(attrs={'class': 'form-select'}),
             'observacao': forms.Textarea(
                 attrs={
-                    'class': 'form-control', 
-                    'rows': 3, 
+                    'class': 'form-control',
+                    'rows': 3,
                     'placeholder': 'Ex: Equipamento entregue com pequena avaria na alça.'
                 }
             ),
@@ -107,8 +97,14 @@ class EmprestimoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
         if self.instance and self.instance.pk:
-            self.fields['epi'].queryset = EPI.objects.filter(quantidade_disponivel__gt=0) | EPI.objects.filter(pk=self.instance.epi.pk)
+            self.fields['epi'].queryset = (
+                EPI.objects.filter(quantidade_disponivel__gt=0) |
+                EPI.objects.filter(pk=self.instance.epi.pk)
+            )
         else:
             self.fields['epi'].queryset = EPI.objects.filter(quantidade_disponivel__gt=0)
+
+        self.fields['colaborador'].queryset = Usuarios.objects.filter(tipo_usuario="COLABORADOR")
+        self.fields['tecnico'].queryset = Usuarios.objects.filter(tipo_usuario="TECNICO")
