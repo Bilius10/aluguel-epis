@@ -68,43 +68,75 @@ class EPIForm(forms.ModelForm):
         }
 
 class EmprestimoForm(forms.ModelForm):
+    # Definindo as opções de status limitadas para a criação
+    CREATE_STATUS_CHOICES = [
+        ('EMPRESTADO', 'Emprestado'),
+        ('FORNECIDO', 'Fornecido'),
+    ]
+
     class Meta:
         model = Emprestimos
         fields = [
             'epi', 
             'colaborador', 
             'tecnico', 
-            'observacao'
+            'data_prevista_devolucao',
+            'condicoes_emprestimo',
+            'status',
+            'data_devolucao',
+            'observacao_devolucao'
         ]
+        
         labels = {
-            'epi': 'Equipamento (EPI)',
-            'colaborador': 'Colaborador (Quem retira)',
+            'epi': 'Equipamento',
+            'colaborador': 'Colaborador',
             'tecnico': 'Técnico Responsável',
-            'observacao': 'Observações (Opcional)',
+            'data_prevista_devolucao': 'Data prevista da devolução',
+            'condicoes_emprestimo': 'Condições do equipamento no empréstimo',
+            'status': 'Status',
+            'data_devolucao': 'Data da devolução',
+            'observacao_devolucao': 'Observação na devolução/perda',
         }
+
         widgets = {
             'epi': forms.Select(attrs={'class': 'form-select'}),
             'colaborador': forms.Select(attrs={'class': 'form-select'}),
             'tecnico': forms.Select(attrs={'class': 'form-select'}),
-            'observacao': forms.Textarea(
+            'data_prevista_devolucao': forms.DateInput(
+                attrs={'class': 'form-control', 'type': 'date'}
+            ),
+            'condicoes_emprestimo': forms.Textarea(
                 attrs={
                     'class': 'form-control',
                     'rows': 3,
                     'placeholder': 'Ex: Equipamento entregue com pequena avaria na alça.'
                 }
             ),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+            'data_devolucao': forms.DateTimeInput(
+                attrs={'class': 'form-control', 'type': 'datetime-local'}
+            ),
+            'observacao_devolucao': forms.Textarea(
+                attrs={'class': 'form-control', 'rows': 3}
+            ),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if self.instance and self.instance.pk:
+        # Lógica para mostrar apenas EPIs disponíveis (continua igual)
+        if self.instance and self.instance.pk and self.instance.epi:
             self.fields['epi'].queryset = (
                 EPI.objects.filter(quantidade_disponivel__gt=0) |
                 EPI.objects.filter(pk=self.instance.epi.pk)
-            )
+            ).distinct()
         else:
             self.fields['epi'].queryset = EPI.objects.filter(quantidade_disponivel__gt=0)
-
+        
+        # Lógica para filtrar usuários por tipo (continua igual)
         self.fields['colaborador'].queryset = Usuarios.objects.filter(tipo_usuario="COLABORADOR")
         self.fields['tecnico'].queryset = Usuarios.objects.filter(tipo_usuario="TECNICO")
+
+        # --- LÓGICA DE VISIBILIDADE DE CAMPOS (AJUSTADA) ---
+        # A LINHA QUE RESTRINGIA AS OPÇÕES DE STATUS FOI REMOVIDA
+        

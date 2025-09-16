@@ -92,49 +92,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleFormSubmit = async (event) => {
         event.preventDefault();
-
+    
         const isUpdating = !!currentEditUserId;
         const url = isUpdating ? `${baseUrl}update/${currentEditUserId}/` : baseUrl;
         
-        let response;
         try {
-            if (isUpdating) {
-                const formData = new FormData(userForm);
-                const data = Object.fromEntries(formData.entries());
-                data.ativo = document.getElementById('id_ativo').checked;
-
-                response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-                    body: JSON.stringify(data)
-                });
-            } else {
-                response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': csrfToken },
-                    body: new FormData(userForm)
-                });
-            }
-
+            // 1. Sempre comece com FormData
+            const formData = new FormData(userForm);
+    
+            // 2. Manipule campos especiais, se necessário.
+            // O FormData não inclui checkboxes desmarcados, então podemos garantir que o valor seja enviado.
+            // O backend do Django interpretará 'true'/'false' corretamente.
+            const ativoCheckbox = document.getElementById('id_ativo');
+            formData.set('ativo', ativoCheckbox.checked);
+    
+            // 3. O fetch agora é o mesmo para criar e atualizar
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 
+                    'X-CSRFToken': csrfToken 
+                    // Sem 'Content-Type', o navegador cuida disso
+                },
+                body: formData
+            });
+    
             const result = await response.json();
-
+    
             if (result.success) {
                 const usuario = result.usuario;
                 if (isUpdating) {
                     updateTableRow(usuario);
-                    showNotification('Colaborador atualizado com sucesso!'); // <-- ADICIONADO
+                    showNotification('Colaborador atualizado com sucesso!');
                 } else {
                     appendTableRow(usuario);
-                    showNotification('Colaborador adicionado com sucesso!'); // <-- ADICIONADO
+                    showNotification('Colaborador adicionado com sucesso!');
                 }
                 closeModal();
             } else {
                 displayFormErrors(result.errors);
             }
-
+    
         } catch (error) {
             console.error('Falha na requisição:', error);
-            alert('Ocorreu um erro na comunicação com o servidor. Verifique o console.');
+            // Mudei o alert para usar a função de notificação de erro
+            showNotification('Ocorreu um erro na comunicação com o servidor.', 'error');
         }
     };
 

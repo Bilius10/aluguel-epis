@@ -1,76 +1,87 @@
-// Arquivo: static/js/emprestimo_crud.js
-
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Seletores de Elementos ---
+
+    // --- SELETORES GLOBAIS ---
+    // Modal principal de Adicionar/Editar
     const emprestimoModal = document.getElementById('emprestimo-modal');
     const modalTitle = document.getElementById('modal-title');
     const emprestimoForm = document.getElementById('emprestimo-form');
-    const emprestimoTableBody = document.getElementById('emprestimo-table-body');
     const addEmprestimoBtn = document.getElementById('add-emprestimo-btn');
-    const closeModalBtn = emprestimoModal.querySelector('.close-btn');
     const cancelBtn = document.getElementById('cancel-btn');
     const submitBtn = emprestimoForm.querySelector('button[type="submit"]');
-    const csrfToken = emprestimoForm.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Tabela e Pesquisa
+    const emprestimoTableBody = document.getElementById('emprestimo-table-body');
     const searchInput = document.getElementById('search-input');
+    const noResultsRow = document.getElementById('no-results-row');
+    const noInitialDataRow = document.getElementById('no-initial-data-row');
 
+    // NOVO: Seletores para a regra de exibição condicional
+    const statusField = document.getElementById('id_status');
+    const camposDevolucao = document.getElementById('campos-devolucao');
+
+    // Outros
+    const csrfToken = emprestimoForm.querySelector('[name=csrfmiddlewaretoken]').value;
     const baseUrl = '/menu/emprestimos/';
-
     let currentEditEmprestimoId = null;
 
-    // --- Função de Notificação --- (Reaproveitada)
+    // --- FUNÇÕES AUXILIARES ---
+
     const showNotification = (message, type = 'success') => {
         const notification = document.createElement('div');
-        notification.className = 'notification-toast';
+        notification.className = `notification-toast ${type}`;
         notification.textContent = message;
-
-        Object.assign(notification.style, {
-            position: 'fixed',
-            bottom: '20px',
-            left: '50%',
-            padding: '12px 24px',
-            borderRadius: '6px',
-            color: 'white',
-            backgroundColor: type === 'success' ? '#28a745' : '#dc3545',
-            zIndex: '1050',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-            opacity: '0',
-            transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out',
-            transform: 'translateX(-50%) translateY(20px)'
-        });
-        
         document.body.appendChild(notification);
 
         setTimeout(() => {
-            notification.style.opacity = '1';
-            notification.style.transform = 'translateX(-50%) translateY(0)';
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+                notification.addEventListener('transitionend', () => notification.remove());
+            }, 3000);
         }, 10);
-
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transform = 'translateX(-50%) translateY(20px)';
-            notification.addEventListener('transitionend', () => notification.remove());
-        }, 3000);
     };
 
-    // --- Funções Auxiliares ---
     const resetForm = () => {
         emprestimoForm.reset();
         currentEditEmprestimoId = null;
-        modalTitle.textContent = 'Registrar Novo Empréstimo';
-        submitBtn.textContent = 'Salvar Empréstimo';
-        clearFormErrors();
-    };
-
-    const openModal = () => { emprestimoModal.style.display = 'flex'; };
-    const closeModal = () => { emprestimoModal.style.display = 'none'; resetForm(); };
-
-    const clearFormErrors = () => {
+        modalTitle.textContent = 'Adicionar Novo Empréstimo';
+        submitBtn.textContent = 'Salvar';
+        submitBtn.disabled = false;
         emprestimoForm.querySelectorAll('.error-message').forEach(el => el.remove());
         emprestimoForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
     };
 
+    const openModal = (modalElement) => {
+        if (modalElement) modalElement.style.display = 'flex';
+    };
+
+    const closeModal = (modalElement) => {
+        if (modalElement) {
+            modalElement.style.display = 'none';
+            if (modalElement.id === 'emprestimo-modal') {
+                resetForm();
+            }
+        }
+    };
+
+    // NOVO: Função que contém a lógica para mostrar/esconder os campos de devolução
+    const toggleCamposDevolucao = () => {
+        if (!statusField || !camposDevolucao) return; // Checagem de segurança
+
+        const statusValue = statusField.value;
+        // ATENÇÃO: Estes valores devem corresponder exatamente aos valores do seu models.py
+        const statusFinais = ['DEVOLVIDO', 'DANIFICADO', 'PERDIDO'];
+
+        if (statusFinais.includes(statusValue)) {
+            camposDevolucao.style.display = 'block'; // Mostra o container
+        } else {
+            camposDevolucao.style.display = 'none'; // Esconde o container
+        }
+    };
+
     const displayFormErrors = (errors) => {
-        clearFormErrors();
+        emprestimoForm.querySelectorAll('.error-message').forEach(el => el.remove());
+        emprestimoForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
         for (const field in errors) {
             const input = document.getElementById(`id_${field}`);
             if (input) {
@@ -78,156 +89,205 @@ document.addEventListener('DOMContentLoaded', () => {
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'error-message';
                 errorDiv.textContent = errors[field][0];
-                input.parentElement.appendChild(errorDiv);
+                input.parentNode.appendChild(errorDiv);
             }
         }
     };
 
-    // Função para formatar data (se necessário, adapta para a saída do backend)
-    const formatDateTime = (dateString) => {
-        if (!dateString) return '';
-        // Supondo que o backend retorna no formato 'DD/MM/YYYY HH:MM' ou algo similar
-        // Se retornar ISO, você pode criar um objeto Date e formatar
-        // const date = new Date(dateString);
-        // return date.toLocaleString('pt-BR');
-        return dateString; // Por enquanto, apenas retorna como vem do backend
+    // --- FUNÇÃO DE FILTRAGEM (Simplificada apenas para a busca rápida) ---
+
+    const applyQuickFilter = () => {
+        const quickFilter = searchInput.value.toLowerCase();
+        const rows = emprestimoTableBody.querySelectorAll('tr:not(#no-results-row):not(#no-initial-data-row)');
+        let visibleRows = 0;
+
+        rows.forEach(row => {
+            const colaboradorCell = row.querySelector('.col-colaborador')?.textContent.toLowerCase() || '';
+            const epiCell = row.querySelector('.col-epi')?.textContent.toLowerCase() || '';
+            
+            const quickMatch = quickFilter === '' || colaboradorCell.includes(quickFilter) || epiCell.includes(quickFilter);
+
+            if (quickMatch) {
+                row.style.display = '';
+                visibleRows++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        if (noResultsRow) {
+            const hasInitialData = !noInitialDataRow || noInitialDataRow.style.display === 'none';
+            noResultsRow.style.display = (visibleRows === 0 && hasInitialData) ? '' : 'none';
+        }
     };
 
-    // --- Lógica de CRUD (Fetch API) ---
+    // --- LÓGICA DE CRUD ---
+
     const handleFormSubmit = async (event) => {
         event.preventDefault();
-        const isUpdating = !!currentEditEmprestimoId;
-        const url = isUpdating ? `${baseUrl}update/${currentEditEmprestimoId}/` : baseUrl;
-        const method = 'POST';
-        
-        try {
-            const formData = new FormData(emprestimoForm);
-            const data = Object.fromEntries(formData.entries()); // Converte para JSON para PUT/PATCH
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Salvando...';
 
+        const isUpdating = !!currentEditEmprestimoId;
+        const url = isUpdating ? `${baseUrl}update/${currentEditEmprestimoId}/` : `${baseUrl}`;
+        const formData = new FormData(emprestimoForm);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
             const response = await fetch(url, {
-                method: method,
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                method: 'POST',
+                headers: { 
+                    'X-CSRFToken': csrfToken, 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify(data)
             });
-
             const result = await response.json();
 
             if (result.success) {
+                const emprestimo = result.emprestimo;
                 if (isUpdating) {
-                    updateTableRow(result.emprestimo);
+                    updateTableRow(emprestimo);
                     showNotification('Empréstimo atualizado com sucesso!');
                 } else {
-                    appendTableRow(result.emprestimo);
+                    appendTableRow(emprestimo);
                     showNotification('Empréstimo registrado com sucesso!');
                 }
-                closeModal();
+                closeModal(emprestimoModal);
             } else {
-                displayFormErrors(result.errors || { general: [result.error] }); // Exibe erros gerais também
+                result.errors ? displayFormErrors(result.errors) : showNotification(result.error || 'Ocorreu um erro desconhecido.', 'error');
             }
         } catch (error) {
             console.error('Falha na requisição:', error);
-            showNotification('Ocorreu um erro na comunicação com o servidor.', 'error');
+            showNotification('Erro de comunicação com o servidor.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = isUpdating ? 'Atualizar' : 'Salvar';
         }
     };
 
-    // --- Manipulação da Tabela (DOM) ---
-    const createTableRowHTML = (emprestimo) => `
-        <td>${emprestimo.colaborador_nome}</td>
-        <td>${emprestimo.epi_nome}</td>
-        <td>${formatDateTime(emprestimo.data_retirada)}</td>
-        <td>${emprestimo.status}</td>
-        <td class="action-buttons">
-            <button class="btn-icon btn-edit" title="Editar">
-                <i class="bi bi-pencil-fill"></i>
-            </button>
-            <button class="btn-icon btn-delete" title="Registrar Devolução / Excluir">
-                <i class="bi bi-check-circle-fill text-success"></i>
-            </button>
-        </td>
-    `;
+    const getStatusHtml = (status) => `<span class="status status-${String(status).toLowerCase()}">${status}</span>`;
 
     const appendTableRow = (emprestimo) => {
+        if (noInitialDataRow) noInitialDataRow.style.display = 'none';
         const newRow = document.createElement('tr');
-        newRow.setAttribute('data-id', emprestimo.id);
-        newRow.innerHTML = createTableRowHTML(emprestimo);
-        emprestimoTableBody.appendChild(newRow);
+        newRow.dataset.id = emprestimo.id;
+        newRow.innerHTML = `
+            <td class="col-colaborador">${emprestimo.colaborador_nome}</td>
+            <td class="col-epi">${emprestimo.epi_nome}</td>
+            <td class="col-data">${emprestimo.data_retirada}</td>
+            <td class="col-status">${getStatusHtml(emprestimo.status)}</td>
+            <td class="action-buttons">
+                <button class="btn-icon btn-edit" title="Editar"><i class="bi bi-pencil-fill"></i></button>
+                <button class="btn-icon btn-delete" title="Excluir"><i class="bi bi-trash-fill"></i></button>
+            </td>
+        `;
+        emprestimoTableBody.prepend(newRow);
+        applyQuickFilter();
     };
 
     const updateTableRow = (emprestimo) => {
         const row = emprestimoTableBody.querySelector(`tr[data-id='${emprestimo.id}']`);
-        if (row) row.innerHTML = createTableRowHTML(emprestimo);
+        if (row) {
+            row.querySelector('.col-colaborador').textContent = emprestimo.colaborador_nome;
+            row.querySelector('.col-epi').textContent = emprestimo.epi_nome;
+            row.querySelector('.col-data').textContent = emprestimo.data_retirada;
+            row.querySelector('.col-status').innerHTML = getStatusHtml(emprestimo.status);
+            applyQuickFilter();
+        }
     };
-    
-    // --- Listeners de Eventos ---
-    addEmprestimoBtn.addEventListener('click', () => { resetForm(); openModal(); });
-    closeModalBtn.addEventListener('click', closeModal);
-    cancelBtn.addEventListener('click', closeModal);
-    window.addEventListener('click', (e) => { if (e.target === emprestimoModal) closeModal(); });
+
+    // --- LISTENERS DE EVENTOS ---
+
+    addEmprestimoBtn.addEventListener('click', () => {
+        resetForm();
+        openModal(emprestimoModal);
+        // MODIFICADO: Chama a função para garantir que os campos comecem escondidos
+        toggleCamposDevolucao();
+    });
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => closeModal(emprestimoModal));
+    }
+
+    // NOVO: Listener que ativa a regra sempre que o status for alterado
+    if (statusField) {
+        statusField.addEventListener('change', toggleCamposDevolucao);
+    }
+
+    document.querySelectorAll('.modal .close-btn').forEach(btn => {
+        btn.addEventListener('click', () => closeModal(btn.closest('.modal')));
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) closeModal(e.target);
+    });
+
     emprestimoForm.addEventListener('submit', handleFormSubmit);
 
     emprestimoTableBody.addEventListener('click', async (event) => {
-        const button = event.target.closest('.btn-edit, .btn-delete');
-        if (!button) return;
+        const target = event.target;
+        const editButton = target.closest('.btn-edit');
+        const deleteButton = target.closest('.btn-delete');
 
-        const row = button.closest('tr');
+        if (!editButton && !deleteButton) return;
+
+        const row = target.closest('tr');
         const emprestimoId = row.dataset.id;
 
-        if (button.classList.contains('btn-edit')) {
+        if (editButton) {
             try {
                 const response = await fetch(`${baseUrl}dados/${emprestimoId}/`);
-                if (!response.ok) throw new Error('Dados do empréstimo não encontrados.');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
-                
-                // Preencher o formulário com os dados
+
                 for (const key in data) {
                     const field = emprestimoForm.elements[key];
-                    if (field) {
-                        field.value = data[key];
-                    }
+                    if (field) field.value = data[key];
                 }
+
                 currentEditEmprestimoId = emprestimoId;
                 modalTitle.textContent = 'Editar Empréstimo';
-                submitBtn.textContent = 'Atualizar Empréstimo';
-                openModal();
+                submitBtn.textContent = 'Atualizar';
+                openModal(emprestimoModal);
+                
+                // MODIFICADO: Chama a função para mostrar/esconder os campos com base nos dados carregados
+                toggleCamposDevolucao();
+
             } catch (error) {
                 console.error('Erro ao buscar dados para edição:', error);
-                showNotification(error.message, 'error');
+                showNotification('Não foi possível carregar os dados para edição.', 'error');
             }
         }
-        
-        if (button.classList.contains('btn-delete')) {
-            // Ação de Devolução/Exclusão
-            if (confirm('Deseja registrar a devolução deste EPI ou excluí-lo permanentemente do registro de empréstimo? (Isso irá retornar o EPI ao estoque)')) {
+
+        if (deleteButton) {
+            if (confirm('Tem certeza que deseja excluir este empréstimo?')) {
                 try {
                     const response = await fetch(`${baseUrl}delete/${emprestimoId}/`, {
                         method: 'DELETE',
                         headers: { 'X-CSRFToken': csrfToken }
                     });
-                    
-                    if (!response.ok) throw new Error('Falha ao registrar devolução/excluir empréstimo.');
+
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     
                     const result = await response.json();
+
                     if (result.success) {
                         row.remove();
-                        showNotification('Empréstimo excluído/devolvido com sucesso!');
+                        showNotification('Empréstimo excluído com sucesso!');
+                        applyQuickFilter();
                     } else {
-                        throw new Error(result.error || 'Erro desconhecido ao registrar devolução.');
+                        showNotification(result.error || 'Falha ao excluir o empréstimo.', 'error');
                     }
-                } catch(error) {
-                    console.error('Erro ao deletar/devolver:', error);
-                    showNotification(error.message, 'error');
+                } catch (error) {
+                    console.error('Erro ao deletar:', error);
+                    showNotification('Erro de comunicação ao tentar excluir.', 'error');
                 }
             }
         }
     });
 
-    searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        emprestimoTableBody.querySelectorAll('tr').forEach(row => {
-            const colaboradorNome = row.children[0].textContent.toLowerCase();
-            const epiNome = row.children[1].textContent.toLowerCase();
-            const isVisible = colaboradorNome.includes(searchTerm) || epiNome.includes(searchTerm);
-            row.style.display = isVisible ? '' : 'none';
-        });
-    });
+    searchInput.addEventListener('input', applyQuickFilter);
+
 });

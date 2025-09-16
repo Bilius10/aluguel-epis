@@ -2,6 +2,8 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views import View
+from django.db import transaction
+from django.db.models import F
 from .models import Usuarios, EPI, Emprestimos
 from .forms import UsuarioForm, EPIForm, EmprestimoForm
 from django.views.generic import TemplateView 
@@ -165,7 +167,12 @@ class EmprestimoCRUDView(View):
 
     def post(self, request):
 
-        form = EmprestimoForm(request.POST)
+        try:
+            data = json.loads(request.body)
+            form = EmprestimoForm(data)
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Dados JSON inválidos.'}, status=400)
+        
         if form.is_valid():
             try:
 
@@ -196,37 +203,67 @@ class EmprestimoCRUDView(View):
         return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
 def get_emprestimo_data(request, pk):
-
+    """ Retorna todos os dados de um empréstimo específico para preencher o formulário de edição. """
     emprestimo = get_object_or_404(Emprestimos, pk=pk)
     data = {
         'epi': emprestimo.epi.id,
         'colaborador': emprestimo.colaborador.id,
         'tecnico': emprestimo.tecnico.id,
-        'observacao': emprestimo.observacao,
+        'data_prevista_devolucao': emprestimo.data_prevista_devolucao.strftime('%Y-%m-%d') if emprestimo.data_prevista_devolucao else '',
+        'condicoes_emprestimo': emprestimo.condicoes_emprestimo,
+        'status': emprestimo.status,
+        'data_devolucao': emprestimo.data_devolucao.strftime('%Y-%m-%dT%H:%M') if emprestimo.data_devolucao else '',
+        # CORREÇÃO DO ATRIBUTO
+        'observacao_devolucao': emprestimo.observacao_devolucao,
     }
     return JsonResponse(data)
 
 def update_emprestimo(request, pk):
-
-    if request.method == 'POST':
-        emprestimo_instance = get_object_or_404(Emprestimos, pk=pk)
-        data = json.loads(request.body)
-        form = EmprestimoForm(data, instance=emprestimo_instance)
-        
-        if form.is_valid():
+    """ Lida com a ATUALIZAÇÃO de um empréstimo existente. """
+    emprestimo_instance = get_object_or_404(Emprestimos, pk=pk)
+    
+    # Guarda os valores originais para comparar depois
+    epi_original = emprestimo_instance.epi
+    status_original = emprestimo_instance.status
+    
+    data = json.loads(request.body)
+    form = EmprestimoForm(data, instance=emprestimo_instance)
+    
+    if form.is_valid():
+        with transaction.atomic():
             emprestimo = form.save()
-            emprestimo_data = {
-                'id': emprestimo.id,
-                'colaborador_nome': emprestimo.colaborador.nome_completo,
-                'epi_nome': emprestimo.epi.nome_equipamento,
-                'data_retirada': emprestimo.data_retirada.strftime('%d/%m/%Y %H:%M'),
-                'status': emprestimo.get_status_display(),
-            }
-            return JsonResponse({'success': True, 'emprestimo': emprestimo_data})
+            epi_novo = emprestimo.epi
+            status_novo = emprestimo.status
             
-        return JsonResponse({'success': False, 'errors': form.errors}, status=400)
-    return JsonResponse({'success': False, 'error': 'Método inválido'}, status=405)
+            # --- LÓGICA DE ATUALIZAÇÃO DE ESTOQUE ---
+            
+            # 1. Se o EPI foi trocado
+            if epi_original.pk != epi_novo.pk:
+                # Devolve o EPI antigo ao estoque
+                epi_original.quantidade_disponivel = F('quantidade_disponivel') + 1
+                epi_original.save()
+                # Retira o EPI novo do estoque
+                epi_novo.quantidade_disponivel = F('quantidade_disponivel') - 1
+                epi_novo.save()
 
+            # 2. Se o status mudou para um de devolução (e não era antes)
+            status_devolucao = ['DEVOLVIDO', 'DANIFICADO', 'PERDIDO']
+            if status_novo in status_devolucao and status_original not in status_devolucao:
+                 # Apenas devolve o item ao estoque se o EPI não foi trocado nesta mesma edição
+                if epi_original.pk == epi_novo.pk:
+                    epi_novo.quantidade_disponivel = F('quantidade_disponivel') + 1
+                    epi_novo.save()
+
+        emprestimo_data = {
+            'id': emprestimo.id,
+            'colaborador_nome': emprestimo.colaborador.nome_completo,
+            'epi_nome': emprestimo.epi.nome_equipamento,
+            'data_retirada': emprestimo.data_retirada.strftime('%d/%m/%Y %H:%M'),
+            'status': emprestimo.get_status_display(),
+        }
+        return JsonResponse({'success': True, 'emprestimo': emprestimo_data})
+        
+    return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
 def delete_emprestimo(request, pk):
     """ Deleta um empréstimo e devolve o item ao estoque. """

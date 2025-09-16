@@ -43,36 +43,36 @@ class EPI(models.Model):
 
 
 class Emprestimos(models.Model):
-    """
-    Registra o empréstimo de um EPI a um colaborador, realizado por um técnico.
-    """
     STATUS_CHOICES = [
-        ('ATIVO', 'Ativo'),
+        ('EMPRESTADO', 'Emprestado'),
+        ('FORNECIDO', 'Fornecido'),
         ('DEVOLVIDO', 'Devolvido'),
-        ('ATRASADO', 'Atrasado'),
+        ('DANIFICADO', 'Danificado'),
+        ('PERDIDO', 'Perdido'),
     ]
 
-    colaborador = models.ForeignKey(
-        Usuarios,
-        on_delete=models.PROTECT,
-        related_name='emprestimos_recebidos',
-        verbose_name="Colaborador"
-    )
-    tecnico = models.ForeignKey(
-        Usuarios,
-        on_delete=models.PROTECT,
-        related_name='emprestimos_realizados',
-        verbose_name="Técnico"
-    )
-    epi = models.ForeignKey(EPI, on_delete=models.PROTECT, verbose_name="EPI")
-    data_retirada = models.DateTimeField(auto_now_add=True)
-    data_devolucao = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ATIVO')
-    observacao = models.TextField(null=True, blank=True)
+    # Campos existentes que já correspondem à tela
+    epi = models.ForeignKey('aluguel.EPI', on_delete=models.PROTECT, verbose_name='EPI')
+    colaborador = models.ForeignKey('aluguel.Usuarios', on_delete=models.PROTECT, related_name='emprestimos_recebidos', verbose_name='Colaborador')
+    data_retirada = models.DateTimeField(auto_now_add=True, verbose_name='Data do Empréstimo')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='EMPRESTADO')
+    data_devolucao = models.DateTimeField(null=True, blank=True, verbose_name='Data da Devolução')
+    tecnico = models.ForeignKey('aluguel.Usuarios', on_delete=models.PROTECT, related_name='emprestimos_realizados', verbose_name='Técnico')
 
-    def __str__(self):
-        return f"Empréstimo de {self.epi.nome_equipamento} para {self.colaborador.nome_completo}"
+    # --- CAMPOS MODIFICADOS E NOVOS ---
+
+    # NOVO: Campo para a data esperada da devolução.
+    data_prevista_devolucao = models.DateField(null=True, blank=True, verbose_name='Data Prevista da Devolução')
+
+    # NOVO: Campo para descrever a condição do EPI no momento do empréstimo.
+    condicoes_emprestimo = models.TextField(null=True, blank=True, verbose_name='Condições no Empréstimo')
+
+    # RENOMEADO: O campo 'observacao' foi renomeado para ser mais específico.
+    observacao_devolucao = models.TextField(null=True, blank=True, verbose_name='Observação na Devolução/Perda')
 
     class Meta:
-        verbose_name = "Empréstimo"
-        verbose_name_plural = "Empréstimos"
+        verbose_name = 'Empréstimo'
+        verbose_name_plural = 'Empréstimos'
+
+    def __str__(self):
+        return f"{self.epi} para {self.colaborador} em {self.data_retirada.strftime('%d/%m/%Y')}"
