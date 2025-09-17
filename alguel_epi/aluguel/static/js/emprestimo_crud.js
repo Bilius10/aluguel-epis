@@ -1,293 +1,202 @@
-document.addEventListener('DOMContentLoaded', () => {
+// Arquivo emprestimo_crud.js com os endpoints corretos
 
-    // --- SELETORES GLOBAIS ---
-    // Modal principal de Adicionar/Editar
-    const emprestimoModal = document.getElementById('emprestimo-modal');
-    const modalTitle = document.getElementById('modal-title');
-    const emprestimoForm = document.getElementById('emprestimo-form');
-    const addEmprestimoBtn = document.getElementById('add-emprestimo-btn');
-    const cancelBtn = document.getElementById('cancel-btn');
-    const submitBtn = emprestimoForm.querySelector('button[type="submit"]');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM carregado. Script 'emprestimo_crud.js' iniciado.");
 
-    // Tabela e Pesquisa
-    const emprestimoTableBody = document.getElementById('emprestimo-table-body');
+    // --- SELETORES E FILTROS (Sem alterações aqui) ---
     const searchInput = document.getElementById('search-input');
+    const filterEpiInput = document.getElementById('id_filtro_equipamento');
+    const filterColaboradorInput = document.getElementById('id_filtro_colaborador');
+    const filterStatusSelect = document.getElementById('id_filtro_status');
+    const filterForm = document.getElementById('filtro-form');
+    const clearFilterBtn = document.getElementById('filtro-limpar-btn'); 
+    const tableBody = document.getElementById('emprestimo-table-body');
     const noResultsRow = document.getElementById('no-results-row');
-    const noInitialDataRow = document.getElementById('no-initial-data-row');
 
-    // NOVO: Seletores para a regra de exibição condicional
-    const statusField = document.getElementById('id_status');
-    const camposDevolucao = document.getElementById('campos-devolucao');
-
-    // Outros
-    const csrfToken = emprestimoForm.querySelector('[name=csrfmiddlewaretoken]').value;
-    const baseUrl = '/menu/emprestimos/';
-    let currentEditEmprestimoId = null;
-
-    // --- FUNÇÕES AUXILIARES ---
-
-    const showNotification = (message, type = 'success') => {
-        const notification = document.createElement('div');
-        notification.className = `notification-toast ${type}`;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.classList.add('show');
-            setTimeout(() => {
-                notification.classList.remove('show');
-                notification.addEventListener('transitionend', () => notification.remove());
-            }, 3000);
-        }, 10);
-    };
-
-    const resetForm = () => {
-        emprestimoForm.reset();
-        currentEditEmprestimoId = null;
-        modalTitle.textContent = 'Adicionar Novo Empréstimo';
-        submitBtn.textContent = 'Salvar';
-        submitBtn.disabled = false;
-        emprestimoForm.querySelectorAll('.error-message').forEach(el => el.remove());
-        emprestimoForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-    };
-
-    const openModal = (modalElement) => {
-        if (modalElement) modalElement.style.display = 'flex';
-    };
-
-    const closeModal = (modalElement) => {
-        if (modalElement) {
-            modalElement.style.display = 'none';
-            if (modalElement.id === 'emprestimo-modal') {
-                resetForm();
-            }
-        }
-    };
-
-    // NOVO: Função que contém a lógica para mostrar/esconder os campos de devolução
-    const toggleCamposDevolucao = () => {
-        if (!statusField || !camposDevolucao) return; // Checagem de segurança
-
-        const statusValue = statusField.value;
-        // ATENÇÃO: Estes valores devem corresponder exatamente aos valores do seu models.py
-        const statusFinais = ['DEVOLVIDO', 'DANIFICADO', 'PERDIDO'];
-
-        if (statusFinais.includes(statusValue)) {
-            camposDevolucao.style.display = 'block'; // Mostra o container
-        } else {
-            camposDevolucao.style.display = 'none'; // Esconde o container
-        }
-    };
-
-    const displayFormErrors = (errors) => {
-        emprestimoForm.querySelectorAll('.error-message').forEach(el => el.remove());
-        emprestimoForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-        for (const field in errors) {
-            const input = document.getElementById(`id_${field}`);
-            if (input) {
-                input.classList.add('is-invalid');
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'error-message';
-                errorDiv.textContent = errors[field][0];
-                input.parentNode.appendChild(errorDiv);
-            }
-        }
-    };
-
-    // --- FUNÇÃO DE FILTRAGEM (Simplificada apenas para a busca rápida) ---
-
-    const applyQuickFilter = () => {
-        const quickFilter = searchInput.value.toLowerCase();
-        const rows = emprestimoTableBody.querySelectorAll('tr:not(#no-results-row):not(#no-initial-data-row)');
-        let visibleRows = 0;
-
-        rows.forEach(row => {
-            const colaboradorCell = row.querySelector('.col-colaborador')?.textContent.toLowerCase() || '';
-            const epiCell = row.querySelector('.col-epi')?.textContent.toLowerCase() || '';
-            
-            const quickMatch = quickFilter === '' || colaboradorCell.includes(quickFilter) || epiCell.includes(quickFilter);
-
-            if (quickMatch) {
+    if (!searchInput || !filterEpiInput || !filterColaboradorInput || !filterStatusSelect || !tableBody || !noResultsRow) {
+        console.error("ERRO CRÍTICO: Um ou mais elementos do DOM não foram encontrados. Verifique os IDs no seu HTML.");
+        return;
+    }
+    function normalizeText(text) {
+        if (!text) return '';
+        return text.toString().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
+    function applyFilters() {
+        const globalSearchText = normalizeText(searchInput.value);
+        const epiFilter = normalizeText(filterEpiInput.value);
+        const colaboradorFilter = normalizeText(filterColaboradorInput.value);
+        const statusFilterValue = filterStatusSelect.value;
+        const allDataRows = tableBody.querySelectorAll('tr[data-id]');
+        let visibleRowCount = 0;
+        allDataRows.forEach(row => {
+            const colaboradorCell = normalizeText(row.querySelector('.col-colaborador')?.textContent);
+            const epiCell = normalizeText(row.querySelector('.col-epi')?.textContent);
+            const dataCell = normalizeText(row.querySelector('.col-data')?.textContent);
+            const statusSpan = row.querySelector('.col-status .status');
+            const statusClass = statusSpan ? Array.from(statusSpan.classList).find(c => c.startsWith('status-')) : '';
+            const statusCellText = statusClass.replace('status-', '').toUpperCase();
+            const rowTextForGlobalSearch = `${colaboradorCell} ${epiCell} ${dataCell}`;
+            const conditions = [
+                globalSearchText === '' || rowTextForGlobalSearch.includes(globalSearchText),
+                epiFilter === '' || epiCell.includes(epiFilter),
+                colaboradorFilter === '' || colaboradorCell.includes(colaboradorFilter),
+                statusFilterValue === '' || statusCellText === statusFilterValue
+            ];
+            const shouldShowRow = conditions.every(condition => condition === true);
+            if (shouldShowRow) {
                 row.style.display = '';
-                visibleRows++;
+                visibleRowCount++;
             } else {
                 row.style.display = 'none';
             }
         });
-
-        if (noResultsRow) {
-            const hasInitialData = !noInitialDataRow || noInitialDataRow.style.display === 'none';
-            noResultsRow.style.display = (visibleRows === 0 && hasInitialData) ? '' : 'none';
+        if (allDataRows.length > 0) {
+            noResultsRow.style.display = visibleRowCount === 0 ? '' : 'none';
         }
-    };
+    }
+    searchInput.addEventListener('input', applyFilters);
+    filterEpiInput.addEventListener('input', applyFilters);
+    filterColaboradorInput.addEventListener('input', applyFilters);
+    filterStatusSelect.addEventListener('change', applyFilters);
+    if (clearFilterBtn) {
+        clearFilterBtn.addEventListener('click', function() {
+            if (filterForm) filterForm.reset();
+            searchInput.value = '';
+            applyFilters();
+        });
+    }
 
-    // --- LÓGICA DE CRUD ---
+    // =================================================================
+    // AJUSTES NO MODAL E CRUD (AÇÕES DE EDITAR, SALVAR, EXCLUIR)
+    // =================================================================
+    const addEmprestimoBtn = document.getElementById('add-emprestimo-btn');
+    const emprestimoModal = document.getElementById('emprestimo-modal');
+    const emprestimoForm = document.getElementById('emprestimo-form');
+    const modalTitle = document.getElementById('modal-title');
+    const closeModalBtns = emprestimoModal.querySelectorAll('.close-btn, #cancel-btn');
+    const statusSelect = document.getElementById('id_status');
+    const camposDevolucao = document.getElementById('campos-devolucao');
 
-    const handleFormSubmit = async (event) => {
+    let editingId = null;
+
+    function openEmprestimoModal(id = null) {
+        emprestimoForm.reset();
+        editingId = id;
+
+        if (id) {
+            modalTitle.textContent = 'Editar Empréstimo';
+            fetch(`/menu/emprestimos/dados/${id}/`) // <-- ALTERADO para seguir o padrão
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('id_epi').value = data.epi;
+                    document.getElementById('id_colaborador').value = data.colaborador;
+                    document.getElementById('id_tecnico').value = data.tecnico;
+                    document.getElementById('id_data_retirada').value = data.data_retirada;
+                    document.getElementById('id_data_prevista_devolucao').value = data.data_prevista_devolucao;
+                    document.getElementById('id_status').value = data.status;
+                    document.getElementById('id_condicoes_emprestimo').value = data.condicoes_emprestimo;
+                    
+                    statusSelect.dispatchEvent(new Event('change'));
+                    
+                    document.getElementById('id_data_devolucao').value = data.data_devolucao || '';
+                    document.getElementById('id_observacao_devolucao').value = data.observacao_devolucao || '';
+                })
+                .catch(error => console.error('Erro ao buscar dados do empréstimo:', error));
+        } else {
+            modalTitle.textContent = 'Adicionar Novo Empréstimo';
+            camposDevolucao.style.display = 'none';
+        }
+        emprestimoModal.style.display = 'block';
+    }
+
+    function closeEmprestimoModal() {
+        emprestimoModal.style.display = 'none';
+        emprestimoForm.reset();
+        editingId = null;
+    }
+
+    addEmprestimoBtn.addEventListener('click', () => openEmprestimoModal());
+    closeModalBtns.forEach(btn => btn.addEventListener('click', closeEmprestimoModal));
+    window.addEventListener('click', function(event) {
+        if (event.target === emprestimoModal) {
+            closeEmprestimoModal();
+        }
+    });
+
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            if (['DEVOLVIDO', 'DANIFICADO', 'PERDIDO'].includes(this.value)) {
+                camposDevolucao.style.display = 'block';
+            } else {
+                camposDevolucao.style.display = 'none';
+            }
+        });
+    }
+
+    emprestimoForm.addEventListener('submit', function(event) {
         event.preventDefault();
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Salvando...';
-
-        const isUpdating = !!currentEditEmprestimoId;
-        const url = isUpdating ? `${baseUrl}update/${currentEditEmprestimoId}/` : `${baseUrl}`;
         const formData = new FormData(emprestimoForm);
         const data = Object.fromEntries(formData.entries());
+        
+        const isEditing = editingId !== null;
+        // Define as URLs para criar e atualizar
+        const url = isEditing ? `/menu/emprestimos/update/${editingId}/` : `/menu/emprestimos/`; // <-- ALTERADO
+        const method = isEditing ? 'PUT' : 'POST';
 
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 
-                    'X-CSRFToken': csrfToken, 
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-            const result = await response.json();
-
-            if (result.success) {
-                const emprestimo = result.emprestimo;
-                if (isUpdating) {
-                    updateTableRow(emprestimo);
-                    showNotification('Empréstimo atualizado com sucesso!');
-                } else {
-                    appendTableRow(emprestimo);
-                    showNotification('Empréstimo registrado com sucesso!');
-                }
-                closeModal(emprestimoModal);
-            } else {
-                result.errors ? displayFormErrors(result.errors) : showNotification(result.error || 'Ocorreu um erro desconhecido.', 'error');
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw err; });
             }
-        } catch (error) {
-            console.error('Falha na requisição:', error);
-            showNotification('Erro de comunicação com o servidor.', 'error');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = isUpdating ? 'Atualizar' : 'Salvar';
-        }
-    };
-
-    const getStatusHtml = (status) => `<span class="status status-${String(status).toLowerCase()}">${status}</span>`;
-
-    const appendTableRow = (emprestimo) => {
-        if (noInitialDataRow) noInitialDataRow.style.display = 'none';
-        const newRow = document.createElement('tr');
-        newRow.dataset.id = emprestimo.id;
-        newRow.innerHTML = `
-            <td class="col-colaborador">${emprestimo.colaborador_nome}</td>
-            <td class="col-epi">${emprestimo.epi_nome}</td>
-            <td class="col-data">${emprestimo.data_retirada}</td>
-            <td class="col-status">${getStatusHtml(emprestimo.status)}</td>
-            <td class="action-buttons">
-                <button class="btn-icon btn-edit" title="Editar"><i class="bi bi-pencil-fill"></i></button>
-                <button class="btn-icon btn-delete" title="Excluir"><i class="bi bi-trash-fill"></i></button>
-            </td>
-        `;
-        emprestimoTableBody.prepend(newRow);
-        applyQuickFilter();
-    };
-
-    const updateTableRow = (emprestimo) => {
-        const row = emprestimoTableBody.querySelector(`tr[data-id='${emprestimo.id}']`);
-        if (row) {
-            row.querySelector('.col-colaborador').textContent = emprestimo.colaborador_nome;
-            row.querySelector('.col-epi').textContent = emprestimo.epi_nome;
-            row.querySelector('.col-data').textContent = emprestimo.data_retirada;
-            row.querySelector('.col-status').innerHTML = getStatusHtml(emprestimo.status);
-            applyQuickFilter();
-        }
-    };
-
-    // --- LISTENERS DE EVENTOS ---
-
-    addEmprestimoBtn.addEventListener('click', () => {
-        resetForm();
-        openModal(emprestimoModal);
-        // MODIFICADO: Chama a função para garantir que os campos comecem escondidos
-        toggleCamposDevolucao();
+            return response.json();
+        })
+        .then(emprestimo => {
+            console.log('Empréstimo salvo:', emprestimo);
+            closeEmprestimoModal();
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Erro ao salvar empréstimo:', error);
+            alert('Erro ao salvar empréstimo: ' + (error.detail || JSON.stringify(error)));
+        });
     });
 
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => closeModal(emprestimoModal));
-    }
-
-    // NOVO: Listener que ativa a regra sempre que o status for alterado
-    if (statusField) {
-        statusField.addEventListener('change', toggleCamposDevolucao);
-    }
-
-    document.querySelectorAll('.modal .close-btn').forEach(btn => {
-        btn.addEventListener('click', () => closeModal(btn.closest('.modal')));
-    });
-
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) closeModal(e.target);
-    });
-
-    emprestimoForm.addEventListener('submit', handleFormSubmit);
-
-    emprestimoTableBody.addEventListener('click', async (event) => {
+    tableBody.addEventListener('click', function(event) {
         const target = event.target;
-        const editButton = target.closest('.btn-edit');
-        const deleteButton = target.closest('.btn-delete');
+        const row = target.closest('tr[data-id]');
+        if (!row) return;
 
-        if (!editButton && !deleteButton) return;
-
-        const row = target.closest('tr');
         const emprestimoId = row.dataset.id;
 
-        if (editButton) {
-            try {
-                const response = await fetch(`${baseUrl}dados/${emprestimoId}/`);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-
-                for (const key in data) {
-                    const field = emprestimoForm.elements[key];
-                    if (field) field.value = data[key];
-                }
-
-                currentEditEmprestimoId = emprestimoId;
-                modalTitle.textContent = 'Editar Empréstimo';
-                submitBtn.textContent = 'Atualizar';
-                openModal(emprestimoModal);
-                
-                // MODIFICADO: Chama a função para mostrar/esconder os campos com base nos dados carregados
-                toggleCamposDevolucao();
-
-            } catch (error) {
-                console.error('Erro ao buscar dados para edição:', error);
-                showNotification('Não foi possível carregar os dados para edição.', 'error');
-            }
-        }
-
-        if (deleteButton) {
+        if (target.closest('.btn-edit')) {
+            openEmprestimoModal(emprestimoId);
+        } else if (target.closest('.btn-delete')) {
             if (confirm('Tem certeza que deseja excluir este empréstimo?')) {
-                try {
-                    const response = await fetch(`${baseUrl}delete/${emprestimoId}/`, {
-                        method: 'DELETE',
-                        headers: { 'X-CSRFToken': csrfToken }
-                    });
-
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    
-                    const result = await response.json();
-
-                    if (result.success) {
-                        row.remove();
-                        showNotification('Empréstimo excluído com sucesso!');
-                        applyQuickFilter();
-                    } else {
-                        showNotification(result.error || 'Falha ao excluir o empréstimo.', 'error');
+                // URL para deletar
+                fetch(`/menu/emprestimos/delete/${emprestimoId}/`, { // <-- ALTERADO
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                     }
-                } catch (error) {
-                    console.error('Erro ao deletar:', error);
-                    showNotification('Erro de comunicação ao tentar excluir.', 'error');
-                }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        row.remove();
+                        applyFilters();
+                        alert('Empréstimo excluído com sucesso!');
+                    } else {
+                        alert('Erro ao excluir empréstimo.');
+                    }
+                })
+                .catch(error => console.error('Erro ao excluir empréstimo:', error));
             }
         }
     });
-
-    searchInput.addEventListener('input', applyQuickFilter);
-
 });

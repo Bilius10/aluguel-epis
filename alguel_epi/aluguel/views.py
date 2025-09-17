@@ -58,15 +58,21 @@ def get_usuario_data(request, pk):
 
 def update_usuario(request, pk):
     if request.method == 'POST':
+        # Leia os dados diretamente do request.POST
+        # Não use 'json.loads(request.body)'
         usuario_instance = get_object_or_404(Usuarios, pk=pk)
-        data = json.loads(request.body)
-        form = UsuarioForm(data, instance=usuario_instance)
+        
+        # O Django e o UsuarioForm já sabem como lidar com request.POST
+        form = UsuarioForm(request.POST, instance=usuario_instance)
 
         if form.is_valid():
             usuario = form.save(commit=False)
+            
+            # Checa se o CPF foi alterado para atualizar a senha
+            # Note que agora você pega o CPF do 'usuario_instance' antes do save
             cpf_limpo = ''.join(filter(str.isdigit, usuario.cpf))
-            if data.get('cpf') != usuario_instance.cpf:
-                 usuario.senha_hash = make_password(cpf_limpo)
+            if usuario.cpf != usuario_instance.cpf:
+                usuario.senha_hash = make_password(cpf_limpo)
             
             usuario.save()
 
@@ -78,7 +84,9 @@ def update_usuario(request, pk):
                     'matricula': usuario.matricula
                 }
             })
-        return JsonResponse({'success': False, 'errors': form.errors})
+        
+        return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
     return JsonResponse({'success': False, 'error': 'Método inválido'}, status=405)
 
 # 4. VIEW PARA DELETAR UM USUÁRIO

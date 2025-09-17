@@ -13,16 +13,40 @@
 <div class="content-area">
     <div class="toolbar">
         <button id="add-emprestimo-btn" class="btn btn-primary">Adicionar Novo Empréstimo</button>
-        
-        <div class="toolbar-actions">
-            <div class="search-container">
-                <i class="bi bi-search"></i>
-                <input type="text" id="search-input" placeholder="Pesquisar por colaborador ou EPI...">
-            </div>
+        <div class="search-container">
+            <i class="bi bi-search"></i>
+            <input type="text" id="search-input" placeholder="Pesquisar em toda a tabela...">
         </div>
     </div>
 
-    <div class="table-container">
+    <div class="filter-area card"> {# Adicionado a classe 'card' #}
+        <h3><i class="bi bi-funnel"></i> Filtros Avançados</h3>
+        <form id="filtro-form" class="filter-grid"> {# Adicionado a classe 'filter-grid' #}
+            <div class="form-group">
+                <label for="id_filtro_equipamento">Equipamento</label>
+                <input type="text" class="form-control" id="id_filtro_equipamento" name="equipamento" placeholder="Nome do EPI">
+            </div>
+            
+            <div class="form-group">
+                <label for="id_filtro_colaborador">Colaborador</label>
+                <input type="text" class="form-control" id="id_filtro_colaborador" name="colaborador" placeholder="Nome do colaborador">
+            </div>
+            
+            <div class="form-group">
+                <label for="id_filtro_status">Status</label>
+                <select class="form-select" id="id_filtro_status" name="status">
+                    <option value="">Todos</option> {# Simplificado para 'Todos' #}
+                    <option value="EMPRESTADO">Emprestado</option>
+                    <option value="FORNECIDO">Fornecido</option>
+                    <option value="DEVOLVIDO">Devolvido</option>
+                    <option value="DANIFICADO">Danificado</option>
+                    <option value="PERDIDO">Perdido</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-container card"> {# Adicionado a classe 'card' #}
         <table class="data-table">
             <thead>
                 <tr>
@@ -64,6 +88,7 @@
     </div>
 </div>
 
+{# O modal de empréstimo permanece inalterado #}
 <div id="emprestimo-modal" class="modal">
     <div class="modal-content">
         <header class="modal-header">
@@ -129,8 +154,6 @@
         </div>
     </div>
 </div>
-<div id="filtro-modal" class="modal">
-    </div>
 {% endblock %}
 
 {% block scripts %}

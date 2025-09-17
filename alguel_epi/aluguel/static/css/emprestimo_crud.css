@@ -1,131 +1,414 @@
-/* ==========================================================================
-   1. ESTILOS GERAIS DA PÁGINA E BOTÕES
-   ========================================================================== */
-
-   .content-area {
-    padding: 2rem;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+/* Estilos gerais para o layout da página */
+.content-area {
+    padding: 20px;
 }
 
-.btn {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 500;
-    border-radius: 6px;
-    border: 1px solid transparent;
-    cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-    text-align: center;
-    white-space: nowrap;
-}
-
-.btn-primary { background-color: #0d6efd; color: white; border-color: #0d6efd; }
-.btn-primary:hover { background-color: #0b5ed7; border-color: #0a58ca; }
-.btn-secondary { background-color: #6c757d; color: white; border-color: #6c757d; }
-.btn-secondary:hover { background-color: #5c636a; border-color: #565e64; }
-.btn-light { background-color: #f8f9fa; border-color: #ced4da; color: #212529; }
-.btn-light:hover { background-color: #e2e6ea; border-color: #adb5bd; }
-
-
-/* ==========================================================================
-   2. BARRA DE FERRAMENTAS E PESQUISA (LAYOUT CORRIGIDO)
-   ========================================================================== */
-
+/* --- Estilos para o Toolbar (barra superior) --- */
 .toolbar {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* Alinha o botão de adicionar à esquerda e a busca à direita */
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0; /* Linha divisória */
 }
 
-/* CORRIGIDO: O nome da classe foi atualizado para corresponder ao HTML */
-.toolbar-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+.toolbar .btn-primary {
+    /* Estilos para o botão Adicionar Novo Empréstimo */
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
 }
 
-/* REMOVIDO: O estilo para #advanced-filter-btn foi removido pois
-   o botão #open-filter-btn já é estilizado pela classe .btn-icon */
+.toolbar .btn-primary:hover {
+    background-color: #0056b3;
+}
 
+/* Estilos para o campo de busca global */
 .search-container {
     position: relative;
+    display: flex;
+    align-items: center;
+    width: 300px; /* Largura fixa para a barra de busca */
 }
 
 .search-container .bi-search {
     position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
+    left: 10px;
     color: #6c757d;
-    pointer-events: none;
 }
 
-#search-input {
-    padding-left: 2.5rem;
-}
-
-
-/* ==========================================================================
-   3. FORMULÁRIOS (GERAL, MODAL E FILTROS)
-   ========================================================================== */
-
-.form-control, .form-select {
+.search-container input {
     width: 100%;
-    padding: 0.75rem;
-    font-size: 1rem;
+    padding: 10px 10px 10px 40px; /* Aumenta o padding esquerdo para o ícone */
     border: 1px solid #ced4da;
-    border-radius: 6px;
-    background-color: #fff;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease;
 }
 
-.form-control:focus, .form-select:focus {
-    border-color: #86b7fe;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+.search-container input:focus {
+    border-color: #007bff;
     outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
-.form-group { margin-bottom: 1.25rem; }
-.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #495057; }
-.is-invalid { border-color: #dc3545 !important; }
-.error-message { color: #dc3545; font-size: 0.875em; margin-top: 0.25rem; }
+/* --- Estilos para a Área de Filtro Avançado --- */
+.filter-area {
+    margin-bottom: 30px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); /* Sombra mais suave */
+    padding: 25px;
+}
+
+.filter-area h3 {
+    font-size: 1.3rem;
+    color: #343a40;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.filter-area h3 .bi-funnel {
+    margin-right: 10px;
+    color: #007bff; /* Cor do ícone */
+}
+
+/* Layout dos campos de filtro usando Grid */
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* 3 colunas, ajusta para telas menores */
+    gap: 20px; /* Espaçamento entre os campos */
+    align-items: flex-end; /* Alinha o botão de limpar na parte inferior */
+}
+
+.filter-area .form-group {
+    margin-bottom: 0; /* Remove margem inferior padrão se houver */
+}
+
+.filter-area .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.filter-area .form-control,
+.filter-area .form-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    color: #495057;
+    background-color: #fff;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.filter-area .form-control:focus,
+.filter-area .form-select:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.filter-area .filter-actions {
+    grid-column: span 1; /* Ocupa uma coluna no grid */
+    display: flex;
+    justify-content: flex-end; /* Alinha o botão à direita */
+    align-items: flex-end; /* Alinha o botão à parte inferior da célula */
+}
+
+.filter-area .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    white-space: nowrap; /* Evita que o texto do botão quebre */
+}
+
+.filter-area .btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* --- Estilos para a Tabela --- */
+.table-container {
+    overflow-x: auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.data-table th, .data-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 0.9rem;
+}
+
+.data-table th {
+    background-color: #f2f2f2;
+    font-weight: 600;
+    color: #343a40;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.data-table .col-status .status {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+/* Cores dos status */
+.status-emprestado { background-color: #ffe0b2; color: #e65100; } /* Laranja */
+.status-fornecido { background-color: #c8e6c9; color: #2e7d32; } /* Verde claro */
+.status-devolvido { background-color: #bbdefb; color: #1976d2; } /* Azul claro */
+.status-danificado { background-color: #ffcdd2; color: #c62828; } /* Vermelho claro */
+.status-perdido { background-color: #e0e0e0; color: #424242; } /* Cinza */
 
 
-/* ==========================================================================
-   5. TABELA DE DADOS
-   ========================================================================== */
+.action-buttons {
+    white-space: nowrap; /* Impede que os botões quebrem a linha */
+}
 
-.table-container { overflow-x: auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
-.data-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-.data-table th, .data-table td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid #dee2e6; vertical-align: middle; }
-.data-table th { background-color: #f1f3f5; font-weight: 600; color: #495057; }
-.data-table tbody tr:hover { background-color: #f8f9fa; }
-.action-buttons { display: flex; gap: 0.75rem; white-space: nowrap; }
-.btn-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; color: #6c757d; transition: color 0.2s, transform 0.2s; padding: 0.25rem; }
-.btn-icon:hover { transform: scale(1.15); }
-.btn-edit:hover { color: #0d6efd; }
-.btn-delete:hover { color: #dc3545; }
-.status { padding: 0.3em 0.7em; border-radius: 12px; font-weight: 600; font-size: 0.8rem; color: #fff; text-transform: uppercase; white-space: nowrap; }
-.status-ativo { background-color: #198754; }
-.status-devolvido { background-color: #6c757d; }
-.status-atrasado { background-color: #dc3545; }
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin: 0 5px;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-edit {
+    color: #007bff;
+}
+.btn-edit:hover {
+    background-color: #e6f2ff;
+}
+
+.btn-delete {
+    color: #dc3545;
+}
+.btn-delete:hover {
+    background-color: #ffeef0;
+}
+
+/* Mensagens de Sem Dados/Sem Resultados */
+#no-initial-data-row td,
+#no-results-row td {
+    text-align: center;
+    color: #6c757d;
+    padding: 20px;
+    font-style: italic;
+}
+
+/* --- Estilos do Modal de Empréstimo (seção de adicionar/editar) --- */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    animation: fadeIn 0.3s ease-out; /* Adiciona animação */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto; /* 5% do topo e centralizado */
+    padding: 30px;
+    border: 1px solid #888;
+    width: 90%; /* Ajuste para telas menores */
+    max-width: 600px; /* Largura máxima */
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation: slideInTop 0.4s ease-out; /* Adiciona animação */
+    display: flex; /* Para organizar o header e body */
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    font-size: 1.5rem;
+    color: #343a40;
+    margin: 0;
+}
+
+.close-btn {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+    transition: color 0.3s ease;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #333;
+    text-decoration: none;
+}
+
+.modal-body {
+    flex-grow: 1; /* Permite que o corpo ocupe o espaço restante */
+    overflow-y: auto; /* Adiciona scroll se o conteúdo for muito grande */
+    padding-right: 5px; /* Para evitar que o scrollbar "grude" no conteúdo */
+}
+
+.modal-body .form-group {
+    margin-bottom: 15px;
+}
+
+.modal-body .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.modal-body .form-control,
+.modal-body .form-select,
+.modal-body textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: #495057;
+}
+
+.modal-body .form-control:focus,
+.modal-body .form-select:focus,
+.modal-body textarea:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.modal-body textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.modal-body .form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.modal-body .form-row .form-group {
+    flex: 1;
+}
+
+.modal-footer {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-footer .btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.modal-footer .btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+.modal-footer .btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.modal-footer .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+}
+.modal-footer .btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInTop {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
 
 
-/* ==========================================================================
-   6. MODAL
-   ========================================================================== */
-
-.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; }
-.modal-content { background-color: #fff; border-radius: 8px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); width: 90%; max-width: 600px; animation: slide-down 0.3s ease-out; }
-@keyframes slide-down { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
-.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e9ecef; }
-.modal-header h2 { margin: 0; font-size: 1.5rem; }
-.close-btn { background: none; border: none; font-size: 2rem; font-weight: bold; color: #6c757d; cursor: pointer; line-height: 1; transition: color 0.2s, transform 0.2s; }
-.close-btn:hover { color: #343a40; transform: rotate(90deg); }
-.modal-body { padding: 1.5rem; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1.25rem 1.5rem; border-top: 1px solid #e9ecef; margin-top: 1.5rem; }
+/* --- Responsividade (Opcional, mas recomendado) --- */
+@media (max-width: 768px) {
+    .toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .search-container {
+        width: 100%; /* Busca ocupa toda a largura em telas pequenas */
+    }
+    .filter-grid {
+        grid-template-columns: 1fr; /* Colunas empilhadas em telas pequenas */
+    }
+    .filter-area .filter-actions {
+        justify-content: flex-start; /* Botão de limpar alinhado à esquerda */
+    }
+    .modal-content {
+        width: 95%;
+        margin: 20px auto;
+    }
+    .modal-body .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
