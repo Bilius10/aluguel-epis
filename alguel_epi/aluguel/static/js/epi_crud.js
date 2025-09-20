@@ -1,7 +1,7 @@
-// Arquivo: static/js/epi_crud.js (VERSÃO VERIFICADA)
+
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Seletores de Elementos ---
+    
     const epiModal = document.getElementById('epi-modal');
     const modalTitle = document.getElementById('modal-title');
     const epiForm = document.getElementById('epi-form');
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentEditEpiId = null;
 
-    // --- Função de Notificação ---
+    
     const showNotification = (message, type = 'success') => {
         const notification = document.createElement('div');
         notification.className = 'notification-toast';
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     };
 
-    // --- Funções Auxiliares ---
+    
     const resetForm = () => {
         epiForm.reset();
         currentEditEpiId = null;
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return date.toLocaleDateString('pt-BR');
     };
 
-    // --- Lógica de CRUD (Fetch API) ---
+    
     const handleFormSubmit = async (event) => {
         event.preventDefault();
         const isUpdating = !!currentEditEpiId;
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- Manipulação da Tabela (DOM) ---
+    
     const createTableRowHTML = (epi) => `
         <td>${epi.nome_equipamento}</td>
         <td>${epi.ca_numero}</td>
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (row) row.innerHTML = createTableRowHTML(epi);
     };
     
-    // --- Listeners de Eventos ---
+    
     addEpiBtn.addEventListener('click', () => { resetForm(); openModal(); });
     closeModalBtn.addEventListener('click', closeModal);
     cancelBtn.addEventListener('click', closeModal);

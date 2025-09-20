@@ -1,9 +1,9 @@
-// Arquivo emprestimo_crud.js com os endpoints corretos
+
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM carregado. Script 'emprestimo_crud.js' iniciado.");
 
-    // --- SELETORES E FILTROS (Sem alterações aqui) ---
+    
     const searchInput = document.getElementById('search-input');
     const filterEpiInput = document.getElementById('id_filtro_equipamento');
     const filterColaboradorInput = document.getElementById('id_filtro_colaborador');
@@ -66,9 +66,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // =================================================================
-    // AJUSTES NO MODAL E CRUD (AÇÕES DE EDITAR, SALVAR, EXCLUIR)
-    // =================================================================
+    
+    
+    
     const addEmprestimoBtn = document.getElementById('add-emprestimo-btn');
     const emprestimoModal = document.getElementById('emprestimo-modal');
     const emprestimoForm = document.getElementById('emprestimo-form');
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (id) {
             modalTitle.textContent = 'Editar Empréstimo';
-            fetch(`/menu/emprestimos/dados/${id}/`) // <-- ALTERADO para seguir o padrão
+            fetch(`/menu/emprestimos/dados/${id}/`) 
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('id_epi').value = data.epi;
@@ -139,8 +139,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const data = Object.fromEntries(formData.entries());
         
         const isEditing = editingId !== null;
-        // Define as URLs para criar e atualizar
-        const url = isEditing ? `/menu/emprestimos/update/${editingId}/` : `/menu/emprestimos/`; // <-- ALTERADO
+        
+        const url = isEditing ? `/menu/emprestimos/update/${editingId}/` : `/menu/emprestimos/`; 
         const method = isEditing ? 'PUT' : 'POST';
 
         fetch(url, {
@@ -179,8 +179,8 @@ document.addEventListener('DOMContentLoaded', function() {
             openEmprestimoModal(emprestimoId);
         } else if (target.closest('.btn-delete')) {
             if (confirm('Tem certeza que deseja excluir este empréstimo?')) {
-                // URL para deletar
-                fetch(`/menu/emprestimos/delete/${emprestimoId}/`, { // <-- ALTERADO
+                
+                fetch(`/menu/emprestimos/delete/${emprestimoId}/`, { 
                     method: 'DELETE',
                     headers: {
                         'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value

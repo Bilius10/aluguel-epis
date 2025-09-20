@@ -1,6 +1,6 @@
-/* Estilos para o editor de perfil */
+
 #profile-editor-content {
-    display: none; /* Escondido por padrão */
+    display: none;
     max-width: 500px;
 }
 
@@ -71,7 +71,7 @@
     background-color: #218838;
 }
 
-/* Estilo para a imagem de perfil no header */
+
 .user-info .header-profile-pic {
     width: 32px;
     height: 32px;

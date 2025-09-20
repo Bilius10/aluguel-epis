@@ -15,13 +15,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentEditUserId = null;
 
-    // --- Função de Notificação --- // <-- ADICIONADO
+    
     const showNotification = (message, type = 'success') => {
         const notification = document.createElement('div');
         notification.className = 'notification-toast';
         notification.textContent = message;
 
-        // Estilos básicos para a notificação
+        
         Object.assign(notification.style, {
             position: 'fixed',
             bottom: '20px',
@@ -30,8 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
             padding: '12px 24px',
             borderRadius: '6px',
             color: 'white',
-            backgroundColor: type === 'success' ? '#28a745' : '#dc3545', // Verde para sucesso, vermelho para erro
-            zIndex: '1050', // Garante que fique acima de outros elementos
+            backgroundColor: type === 'success' ? '#28a745' : '#dc3545', 
+            zIndex: '1050', 
             boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
             opacity: '0',
             transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out',
@@ -40,13 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         document.body.appendChild(notification);
 
-        // Animação de entrada
+        
         setTimeout(() => {
             notification.style.opacity = '1';
             notification.style.transform = 'translateX(-50%) translateY(0)';
         }, 10);
 
-        // Animação de saída e remoção após 3 segundos
+        
         setTimeout(() => {
             notification.style.opacity = '0';
             notification.style.transform = 'translateX(-50%) translateY(20px)';
@@ -97,21 +97,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = isUpdating ? `${baseUrl}update/${currentEditUserId}/` : baseUrl;
         
         try {
-            // 1. Sempre comece com FormData
+            
             const formData = new FormData(userForm);
     
-            // 2. Manipule campos especiais, se necessário.
-            // O FormData não inclui checkboxes desmarcados, então podemos garantir que o valor seja enviado.
-            // O backend do Django interpretará 'true'/'false' corretamente.
+            
+            
+            
             const ativoCheckbox = document.getElementById('id_ativo');
             formData.set('ativo', ativoCheckbox.checked);
     
-            // 3. O fetch agora é o mesmo para criar e atualizar
+            
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 
                     'X-CSRFToken': csrfToken 
-                    // Sem 'Content-Type', o navegador cuida disso
+                    
                 },
                 body: formData
             });
@@ -134,12 +134,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
         } catch (error) {
             console.error('Falha na requisição:', error);
-            // Mudei o alert para usar a função de notificação de erro
+            
             showNotification('Ocorreu um erro na comunicação com o servidor.', 'error');
         }
     };
 
-    // --- Manipulação da Tabela (DOM) ---
+    
 
     const appendTableRow = (usuario) => {
         const newRow = document.createElement('tr');
@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    // --- Listeners de Eventos ---
+    
 
     addUserBtn.addEventListener('click', () => {
         resetForm();
@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (result.success) {
                         row.remove();
-                        showNotification('Colaborador excluído com sucesso!'); // <-- ADICIONADO
+                        showNotification('Colaborador excluído com sucesso!'); 
                     } else {
                         alert('Ocorreu um erro ao excluir: ' + (result.error || 'Erro desconhecido.'));
                     }
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Listener para a barra de pesquisa ---
+    
     searchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
         const rows = userTableBody.querySelectorAll('tr');

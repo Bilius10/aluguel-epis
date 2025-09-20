@@ -1,20 +1,20 @@
-/* Estilos gerais para o layout da página */
+
 .content-area {
     padding: 20px;
 }
 
-/* --- Estilos para o Toolbar (barra superior) --- */
+
 .toolbar {
     display: flex;
-    justify-content: space-between; /* Alinha o botão de adicionar à esquerda e a busca à direita */
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 25px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #e0e0e0; /* Linha divisória */
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .toolbar .btn-primary {
-    /* Estilos para o botão Adicionar Novo Empréstimo */
+   
     background-color: #007bff;
     color: white;
     border: none;
@@ -29,12 +29,12 @@
     background-color: #0056b3;
 }
 
-/* Estilos para o campo de busca global */
+
 .search-container {
     position: relative;
     display: flex;
     align-items: center;
-    width: 300px; /* Largura fixa para a barra de busca */
+    width: 300px;
 }
 
 .search-container .bi-search {
@@ -45,7 +45,7 @@
 
 .search-container input {
     width: 100%;
-    padding: 10px 10px 10px 40px; /* Aumenta o padding esquerdo para o ícone */
+    padding: 10px 10px 10px 40px;
     border: 1px solid #ced4da;
     border-radius: 5px;
     font-size: 0.95rem;
@@ -58,12 +58,12 @@
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
-/* --- Estilos para a Área de Filtro Avançado --- */
+
 .filter-area {
     margin-bottom: 30px;
     background-color: #ffffff;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); /* Sombra mais suave */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     padding: 25px;
 }
 
@@ -77,19 +77,19 @@
 
 .filter-area h3 .bi-funnel {
     margin-right: 10px;
-    color: #007bff; /* Cor do ícone */
+    color: #007bff;
 }
 
-/* Layout dos campos de filtro usando Grid */
+
 .filter-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* 3 colunas, ajusta para telas menores */
-    gap: 20px; /* Espaçamento entre os campos */
-    align-items: flex-end; /* Alinha o botão de limpar na parte inferior */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    align-items: flex-end;
 }
 
 .filter-area .form-group {
-    margin-bottom: 0; /* Remove margem inferior padrão se houver */
+    margin-bottom: 0;
 }
 
 .filter-area .form-group label {
@@ -120,10 +120,10 @@
 }
 
 .filter-area .filter-actions {
-    grid-column: span 1; /* Ocupa uma coluna no grid */
+    grid-column: span 1;
     display: flex;
-    justify-content: flex-end; /* Alinha o botão à direita */
-    align-items: flex-end; /* Alinha o botão à parte inferior da célula */
+    justify-content: flex-end;
+    align-items: flex-end;
 }
 
 .filter-area .btn-secondary {
@@ -135,14 +135,14 @@
     cursor: pointer;
     font-size: 1rem;
     transition: background-color 0.3s ease;
-    white-space: nowrap; /* Evita que o texto do botão quebre */
+    white-space: nowrap;
 }
 
 .filter-area .btn-secondary:hover {
     background-color: #5a6268;
 }
 
-/* --- Estilos para a Tabela --- */
+
 .table-container {
     overflow-x: auto;
     background-color: #ffffff;
@@ -184,16 +184,16 @@
     white-space: nowrap;
 }
 
-/* Cores dos status */
-.status-emprestado { background-color: #ffe0b2; color: #e65100; } /* Laranja */
-.status-fornecido { background-color: #c8e6c9; color: #2e7d32; } /* Verde claro */
-.status-devolvido { background-color: #bbdefb; color: #1976d2; } /* Azul claro */
-.status-danificado { background-color: #ffcdd2; color: #c62828; } /* Vermelho claro */
-.status-perdido { background-color: #e0e0e0; color: #424242; } /* Cinza */
+
+.status-emprestado { background-color: #ffe0b2; color: #e65100; }
+.status-fornecido { background-color: #c8e6c9; color: #2e7d32; }
+.status-devolvido { background-color: #bbdefb; color: #1976d2; }
+.status-danificado { background-color: #ffcdd2; color: #c62828; }
+.status-perdido { background-color: #e0e0e0; color: #424242; }
 
 
 .action-buttons {
-    white-space: nowrap; /* Impede que os botões quebrem a linha */
+    white-space: nowrap;
 }
 
 .btn-icon {
@@ -221,7 +221,7 @@
     background-color: #ffeef0;
 }
 
-/* Mensagens de Sem Dados/Sem Resultados */
+
 #no-initial-data-row td,
 #no-results-row td {
     text-align: center;
@@ -230,31 +230,31 @@
     font-style: italic;
 }
 
-/* --- Estilos do Modal de Empréstimo (seção de adicionar/editar) --- */
+
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
+    display: none;
+    position: fixed;
+    z-index: 1000;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-    animation: fadeIn 0.3s ease-out; /* Adiciona animação */
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+    animation: fadeIn 0.3s ease-out;
 }
 
 .modal-content {
     background-color: #fefefe;
-    margin: 5% auto; /* 5% do topo e centralizado */
+    margin: 5% auto;
     padding: 30px;
     border: 1px solid #888;
-    width: 90%; /* Ajuste para telas menores */
-    max-width: 600px; /* Largura máxima */
+    width: 90%;
+    max-width: 600px;
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    animation: slideInTop 0.4s ease-out; /* Adiciona animação */
-    display: flex; /* Para organizar o header e body */
+    animation: slideInTop 0.4s ease-out;
+    display: flex;
     flex-direction: column;
 }
 
@@ -291,9 +291,9 @@
 }
 
 .modal-body {
-    flex-grow: 1; /* Permite que o corpo ocupe o espaço restante */
-    overflow-y: auto; /* Adiciona scroll se o conteúdo for muito grande */
-    padding-right: 5px; /* Para evitar que o scrollbar "grude" no conteúdo */
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 5px;
 }
 
 .modal-body .form-group {
@@ -375,7 +375,7 @@
     background-color: #5a6268;
 }
 
-/* Animações */
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -387,7 +387,7 @@
 }
 
 
-/* --- Responsividade (Opcional, mas recomendado) --- */
+
 @media (max-width: 768px) {
     .toolbar {
         flex-direction: column;
@@ -395,13 +395,13 @@
         gap: 15px;
     }
     .search-container {
-        width: 100%; /* Busca ocupa toda a largura em telas pequenas */
+        width: 100%;
     }
     .filter-grid {
-        grid-template-columns: 1fr; /* Colunas empilhadas em telas pequenas */
+        grid-template-columns: 1fr;
     }
     .filter-area .filter-actions {
-        justify-content: flex-start; /* Botão de limpar alinhado à esquerda */
+        justify-content: flex-start;
     }
     .modal-content {
         width: 95%;
