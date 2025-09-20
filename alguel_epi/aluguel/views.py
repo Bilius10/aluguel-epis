@@ -58,18 +58,15 @@ def get_usuario_data(request, pk):
 
 def update_usuario(request, pk):
     if request.method == 'POST':
-        # Leia os dados diretamente do request.POST
-        # Não use 'json.loads(request.body)'
+    
         usuario_instance = get_object_or_404(Usuarios, pk=pk)
         
-        # O Django e o UsuarioForm já sabem como lidar com request.POST
         form = UsuarioForm(request.POST, instance=usuario_instance)
 
         if form.is_valid():
             usuario = form.save(commit=False)
             
             # Checa se o CPF foi alterado para atualizar a senha
-            # Note que agora você pega o CPF do 'usuario_instance' antes do save
             cpf_limpo = ''.join(filter(str.isdigit, usuario.cpf))
             if usuario.cpf != usuario_instance.cpf:
                 usuario.senha_hash = make_password(cpf_limpo)
@@ -221,7 +218,6 @@ def get_emprestimo_data(request, pk):
         'condicoes_emprestimo': emprestimo.condicoes_emprestimo,
         'status': emprestimo.status,
         'data_devolucao': emprestimo.data_devolucao.strftime('%Y-%m-%dT%H:%M') if emprestimo.data_devolucao else '',
-        # CORREÇÃO DO ATRIBUTO
         'observacao_devolucao': emprestimo.observacao_devolucao,
     }
     return JsonResponse(data)
@@ -254,10 +250,9 @@ def update_emprestimo(request, pk):
                 epi_novo.quantidade_disponivel = F('quantidade_disponivel') - 1
                 epi_novo.save()
 
-            # 2. Se o status mudou para um de devolução (e não era antes)
             status_devolucao = ['DEVOLVIDO', 'DANIFICADO', 'PERDIDO']
             if status_novo in status_devolucao and status_original not in status_devolucao:
-                 # Apenas devolve o item ao estoque se o EPI não foi trocado nesta mesma edição
+        
                 if epi_original.pk == epi_novo.pk:
                     epi_novo.quantidade_disponivel = F('quantidade_disponivel') + 1
                     epi_novo.save()
