@@ -68,7 +68,7 @@ class EPIForm(forms.ModelForm):
         }
 
 class EmprestimoForm(forms.ModelForm):
-    # Definindo as opções de status limitadas para a criação
+    
     CREATE_STATUS_CHOICES = [
         ('EMPRESTADO', 'Emprestado'),
         ('FORNECIDO', 'Fornecido'),
@@ -124,7 +124,6 @@ class EmprestimoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Lógica para mostrar apenas EPIs disponíveis (continua igual)
         if self.instance and self.instance.pk and self.instance.epi:
             self.fields['epi'].queryset = (
                 EPI.objects.filter(quantidade_disponivel__gt=0) |
@@ -133,10 +132,7 @@ class EmprestimoForm(forms.ModelForm):
         else:
             self.fields['epi'].queryset = EPI.objects.filter(quantidade_disponivel__gt=0)
         
-        # Lógica para filtrar usuários por tipo (continua igual)
         self.fields['colaborador'].queryset = Usuarios.objects.filter(tipo_usuario="COLABORADOR")
         self.fields['tecnico'].queryset = Usuarios.objects.filter(tipo_usuario="TECNICO")
 
-        # --- LÓGICA DE VISIBILIDADE DE CAMPOS (AJUSTADA) ---
-        # A LINHA QUE RESTRINGIA AS OPÇÕES DE STATUS FOI REMOVIDA
         
