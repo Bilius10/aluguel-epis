@@ -51,7 +51,6 @@ class Emprestimos(models.Model):
         ('PERDIDO', 'Perdido'),
     ]
 
-    # Campos existentes que já correspondem à tela
     epi = models.ForeignKey('aluguel.EPI', on_delete=models.PROTECT, verbose_name='EPI')
     colaborador = models.ForeignKey('aluguel.Usuarios', on_delete=models.PROTECT, related_name='emprestimos_recebidos', verbose_name='Colaborador')
     data_retirada = models.DateTimeField(auto_now_add=True, verbose_name='Data do Empréstimo')
