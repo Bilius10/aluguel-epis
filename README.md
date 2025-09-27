@@ -39,17 +39,22 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
         python3 -m venv venv
         source venv/bin/activate
         ```
-
-3.  **Aplique as migrações:**
+3.  **Instalar o Django:**
+    Este comando irá instalar o django em seu ambiente.
+    ```bash
+    pip instal Django
+    ```
+    
+4.  **Aplique as migrações:**
     Este comando irá criar todas as tabelas no banco de dados com base nos modelos definidos.
     ```bash
     python manage.py migrate
     ```
 
-4.  **Inicie o servidor de desenvolvimento:**
+5.  **Inicie o servidor de desenvolvimento:**
     ```bash
     python manage.py runserver
     ```
 
-5.  **Acesse a aplicação:**
+6.  **Acesse a aplicação:**
     Abra seu navegador e acesse [http://127.0.0.1:8000/](http://127.0.0.1:8000/). Você deverá ver a página de menu inicial do projeto.
