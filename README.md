@@ -45,6 +45,7 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
     pip instal Django
     pip instal Selenium
     pip instal pytest
+    pip install pytest-django
     ```
     
 4.  **Aplique as migrações:**
