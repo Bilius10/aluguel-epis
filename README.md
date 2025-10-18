@@ -43,6 +43,9 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
     Este comando irá instalar o django em seu ambiente.
     ```bash
     pip instal Django
+    pip instal Selenium
+    pip instal pytest
+    pip instal pytest-django
     ```
     
 4.  **Aplique as migrações:**
@@ -56,5 +59,10 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
     python manage.py runserver
     ```
 
-6.  **Acesse a aplicação:**
+6.  **Inicie os testes:**
+    ```bash
+    python -m pytest
+    ```   
+
+7.  **Acesse a aplicação:**
     Abra seu navegador e acesse [http://127.0.0.1:8000/](http://127.0.0.1:8000/). Você deverá ver a página de menu inicial do projeto.
