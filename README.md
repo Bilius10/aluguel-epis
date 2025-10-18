@@ -43,6 +43,8 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
     Este comando irá instalar o django em seu ambiente.
     ```bash
     pip instal Django
+    pip instal Selenium
+    pip instal pytest
     ```
     
 4.  **Aplique as migrações:**
